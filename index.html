@@ -1,55 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Roblox Profile Viewer</title>
-    <style>
-        body {
-            background: #1a1a1a;
-            color: white;
-            font-family: Arial;
-            text-align: center;
-            padding: 50px;
-        }
-        .loading {
-            color: #00b8ff;
-            font-size: 20px;
-        }
-    </style>
+    <title>Roblox Viewer</title>
 </head>
 <body>
     <h1>Roblox Profile Viewer</h1>
-    <div class="loading">Cargando perfiles...</div>
     
     <script>
-        // ===========================================
-        // REGISTRAR SERVICE WORKER (EL CORAZÓN)
-        // ===========================================
+        // Registrar Service Worker con scope CORRECTO
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js', { scope: '/' })
-                .then(reg => console.log('✅ Service Worker registrado'))
-                .catch(err => console.log('❌ Error:', err));
+            navigator.serviceWorker.register('sw.js', {
+                scope: '/image_9180173538.png/'  // <-- IMPORTANTE: mismo path
+            }).then(reg => {
+                console.log('✅ SW registrado:', reg.scope);
+            }).catch(err => {
+                console.log('❌ Error SW:', err);
+            });
         }
-
-        // ===========================================
-        // HACER PETICIÓN REAL A ROBLOX (OPCIONAL)
-        // ===========================================
+        
+        // Hacer petición de prueba
         setTimeout(() => {
             fetch('https://apis.roblox.com/user-profile-api/v1/user/profiles/get-profiles', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userIds: [4033960902, 123456789],
-                    fields: ["names.combinedName", "isVerified"]
-                })
-            }).then(r => r.json()).then(data => {
-                document.querySelector('.loading').innerHTML = '✅ Perfiles cargados';
-                console.log('Respuesta:', data);
-            }).catch(e => {
-                document.querySelector('.loading').innerHTML = '❌ Error';
-            });
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userIds: [4033960902] })
+            }).catch(e => console.log('Fetch error:', e));
         }, 2000);
     </script>
 </body>
