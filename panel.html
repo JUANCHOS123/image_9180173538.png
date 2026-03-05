@@ -1056,4 +1056,392 @@
                                 div.className = 'result-item';
                                 div.innerHTML = `<strong>${user.name}</strong> <span style="color: #666;">(${user.id})</span>`;
                                 div.addEventListener('click', () => {
-                                    document.getElementById('
+                                    document.getElementById('targetId').value = user.id;
+                                    showMessage('friendSuccessMsg', `Usuario ${user.name} seleccionado`);
+                                    resultsDiv.innerHTML = '<div class="result-item">✅ Usuario seleccionado</div>';
+                                });
+                                resultsDiv.appendChild(div);
+                            });
+                        } else {
+                            resultsDiv.innerHTML = '<div class="result-item">❌ No se encontraron usuarios</div>';
+                        }
+                    } catch (e) {
+                        addLog('[ERROR] Error en búsqueda', 'error');
+                    }
+                }, 500));
+            }
+            
+            // Aceptar todas solicitudes
+            document.getElementById('acceptAllBtn')?.addEventListener('click', async function() {
+                addLog('[ACCION] Aceptando todas las solicitudes...');
+                showMessage('friendWarningMsg', 'Procesando solicitudes...');
+                
+                try {
+                    const res = await fetch('https://friends.roblox.com/v1/my/friends/requests', {
+                        credentials: 'include'
+                    });
+                    
+                    if (res.ok) {
+                        const data = await res.json();
+                        let aceptadas = 0;
+                        
+                        for (const req of data.data || []) {
+                            const acceptRes = await fetch(`https://friends.roblox.com/v1/users/${req.id}/accept-friend-request`, {
+                                method: 'POST',
+                                credentials: 'include',
+                                headers: { 'X-CSRF-TOKEN': csrfToken }
+                            });
+                            
+                            if (acceptRes.ok) {
+                                aceptadas++;
+                                addLog(`[AMISTAD] Solicitud de ${req.name} aceptada`);
+                            }
+                        }
+                        
+                        showMessage('friendSuccessMsg', `✅ ${aceptadas} solicitudes aceptadas`);
+                        cargarEstadisticas();
+                    }
+                } catch (e) {
+                    showMessage('friendWarningMsg', '❌ Error al aceptar solicitudes', 'error');
+                    addLog('[ERROR] No se pudieron aceptar solicitudes', 'error');
+                }
+            });
+            
+            // Enviar solicitud de amistad
+            document.getElementById('sendFriendRequestBtn')?.addEventListener('click', async function() {
+                const targetId = document.getElementById('targetId')?.value;
+                if (!targetId) {
+                    showMessage('friendWarningMsg', '❌ Ingresa un ID de usuario', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://friends.roblox.com/v1/users/${targetId}/request-friendship`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('friendSuccessMsg', '✅ Solicitud enviada');
+                        addLog(`[AMISTAD] Solicitud enviada a ${targetId}`);
+                    } else {
+                        showMessage('friendWarningMsg', '❌ No se pudo enviar solicitud', 'error');
+                    }
+                } catch (e) {
+                    showMessage('friendWarningMsg', '❌ Error al enviar solicitud', 'error');
+                }
+            });
+            
+            // Comprar objeto
+            document.getElementById('purchaseBtn')?.addEventListener('click', async function() {
+                const link = document.getElementById('itemLink')?.value;
+                const price = document.getElementById('itemPrice')?.value;
+                
+                const match = link?.match(/catalog\/(\d+)/);
+                if (!match) {
+                    showMessage('purchaseWarningMsg', '❌ Enlace inválido', 'error');
+                    return;
+                }
+                
+                const itemId = match[1];
+                showMessage('purchaseWarningMsg', '⏳ Procesando compra...');
+                
+                try {
+                    const res = await fetch(`https://economy.roblox.com/v1/purchases/products/${itemId}`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            expectedCurrency: 1,
+                            expectedPrice: parseInt(price) || 0
+                        })
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('purchaseSuccessMsg', '✅ Compra realizada con éxito');
+                        addLog(`[COMPRA] Item ${itemId} comprado por ${price || 0} Robux`);
+                        cargarEstadisticas();
+                    } else {
+                        const error = await res.text();
+                        showMessage('purchaseWarningMsg', `❌ Error en compra: ${res.status}`, 'error');
+                        addLog(`[ERROR] Compra fallida: ${res.status}`, 'error');
+                    }
+                } catch (e) {
+                    showMessage('purchaseWarningMsg', '❌ Error de conexión', 'error');
+                }
+            });
+            
+            // Compras rápidas
+            document.getElementById('quickBuyDominus')?.addEventListener('click', function() {
+                document.getElementById('itemLink').value = 'https://www.roblox.com/catalog/123456789/Dominus';
+                document.getElementById('itemPrice').value = '100000';
+                showMessage('purchaseSuccessMsg', '✅ Dominus seleccionado');
+            });
+            
+            document.getElementById('quickBuyHeadless')?.addEventListener('click', function() {
+                document.getElementById('itemLink').value = 'https://www.roblox.com/catalog/201/Headless';
+                document.getElementById('itemPrice').value = '31000';
+                showMessage('purchaseSuccessMsg', '✅ Headless seleccionado');
+            });
+            
+            // Unirse a grupo
+            document.getElementById('joinGroupBtn')?.addEventListener('click', async function() {
+                const groupId = document.getElementById('targetId')?.value;
+                if (!groupId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de grupo', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://groups.roblox.com/v1/groups/${groupId}/users`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ userId: userData.id })
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Unido al grupo');
+                        addLog(`[GRUPO] Unido al grupo ${groupId}`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo unir al grupo', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al unirse', 'error');
+                }
+            });
+            
+            // Salir de grupo
+            document.getElementById('leaveGroupBtn')?.addEventListener('click', async function() {
+                const groupId = document.getElementById('targetId')?.value;
+                if (!groupId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de grupo', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://groups.roblox.com/v1/groups/${groupId}/users/${userData.id}`, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Saliste del grupo');
+                        addLog(`[GRUPO] Saliste del grupo ${groupId}`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo salir del grupo', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al salir', 'error');
+                }
+            });
+            
+            // Bloquear usuario
+            document.getElementById('blockUserBtn')?.addEventListener('click', async function() {
+                const userId = document.getElementById('targetId')?.value;
+                if (!userId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de usuario', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://friends.roblox.com/v1/users/${userId}/block`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Usuario bloqueado');
+                        addLog(`[BLOQUEO] Usuario ${userId} bloqueado`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo bloquear', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al bloquear', 'error');
+                }
+            });
+            
+            // Desbloquear usuario
+            document.getElementById('unblockUserBtn')?.addEventListener('click', async function() {
+                const userId = document.getElementById('targetId')?.value;
+                if (!userId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de usuario', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://friends.roblox.com/v1/users/${userId}/unblock`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Usuario desbloqueado');
+                        addLog(`[BLOQUEO] Usuario ${userId} desbloqueado`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo desbloquear', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al desbloquear', 'error');
+                }
+            });
+            
+            // Seguir usuario
+            document.getElementById('followUserBtn')?.addEventListener('click', async function() {
+                const userId = document.getElementById('targetId')?.value;
+                if (!userId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de usuario', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://friends.roblox.com/v1/users/${userId}/follow`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Ahora sigues al usuario');
+                        addLog(`[SEGUIMIENTO] Siguiendo a ${userId}`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo seguir', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al seguir', 'error');
+                }
+            });
+            
+            // Dejar de seguir
+            document.getElementById('unfollowUserBtn')?.addEventListener('click', async function() {
+                const userId = document.getElementById('targetId')?.value;
+                if (!userId) {
+                    showMessage('actionWarningMsg', '❌ Ingresa ID de usuario', 'error');
+                    return;
+                }
+                
+                try {
+                    const res = await fetch(`https://friends.roblox.com/v1/users/${userId}/unfollow`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Dejaste de seguir al usuario');
+                        addLog(`[SEGUIMIENTO] Dejaste de seguir a ${userId}`);
+                    } else {
+                        showMessage('actionWarningMsg', '❌ No se pudo dejar de seguir', 'error');
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error', 'error');
+                }
+            });
+            
+            // Cerrar sesión
+            document.getElementById('logoutBtn')?.addEventListener('click', async function() {
+                showMessage('actionWarningMsg', '⏳ Cerrando sesión...');
+                
+                try {
+                    const res = await fetch('https://auth.roblox.com/v2/logout', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'X-CSRF-TOKEN': csrfToken }
+                    });
+                    
+                    if (res.ok) {
+                        showMessage('actionSuccessMsg', '✅ Sesión cerrada');
+                        addLog('[SESIÓN] Sesión de Roblox cerrada', 'warning');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                } catch (e) {
+                    showMessage('actionWarningMsg', '❌ Error al cerrar sesión', 'error');
+                }
+            });
+            
+            // Actualizar datos
+            document.getElementById('refreshDataBtn')?.addEventListener('click', cargarEstadisticas);
+            
+            // Limpiar logs
+            document.getElementById('clearLogsBtn')?.addEventListener('click', function() {
+                document.getElementById('logArea').innerHTML = '<div class="log-entry">[SISTEMA] Logs limpiados</div>';
+            });
+            
+            // Reset de emergencia
+            document.getElementById('emergencyResetBtn')?.addEventListener('click', function() {
+                if (confirm('⚠️ ¿Resetear todo? Se perderán los datos no guardados.')) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    location.reload();
+                }
+            });
+        }
+        
+        // =========== FUNCIÓN DEBOUNCE ===========
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // =========== MOSTRAR MENSAJES ===========
+        function showMessage(elementId, message, type = 'success') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.add('show');
+                setTimeout(() => element.classList.remove('show'), 3000);
+            }
+        }
+        
+        // =========== AÑADIR LOG ===========
+        function addLog(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            if (!logArea) return;
+            
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff4444' : (type === 'warning' ? '#ffaa00' : '#0f0');
+            
+            entry.innerHTML = `[${timestamp}] <span style="color: ${color};">${message}</span>`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        // =========== VERIFICAR CADA 10 SEGUNDOS ===========
+        setInterval(() => {
+            if (controlPanel.classList.contains('show')) {
+                const savedData = localStorage.getItem('cuenta_roblox');
+                if (savedData) {
+                    try {
+                        const data = JSON.parse(savedData);
+                        if (data.conectada && data.data && data.data.id !== userData?.id) {
+                            verificarCuentaPanel();
+                        }
+                    } catch (e) {}
+                }
+            }
+        }, 10000);
+        
+        // Inicializar contador de intentos
+        actualizarIntentos();
+    </script>
+</body>
+</html>
